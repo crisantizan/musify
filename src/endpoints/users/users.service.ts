@@ -1,7 +1,7 @@
 import UserModel, { UserDocument } from '@/models/user.model';
 import { UserCreate } from './users.type';
 import { EncryptService } from '@/services/encrypt.service';
-import { HttpResponse } from '@/helpers/http-response.helper';
+import { httpResponse } from '@/helpers/http-response.helper';
 import { HttpStatus } from '@/common/enums/http-status.enum';
 
 export class UsersService {
@@ -15,7 +15,7 @@ export class UsersService {
   /** save a new user */
   public async save(data: UserCreate) {
     if (await this.emailExists(data.email)) {
-      return HttpResponse(
+      return httpResponse(
         HttpStatus.BAD_REQUEST,
         'email passed already exists',
       );
@@ -24,7 +24,8 @@ export class UsersService {
     data.password = await EncryptService.createHash(data.password);
     const model = new UserModel(data);
     const user = await model.save();
-    return HttpResponse(HttpStatus.CREATED, user);
+
+    return httpResponse(HttpStatus.CREATED, user);
   }
 
   /** validate existence of the email passed */

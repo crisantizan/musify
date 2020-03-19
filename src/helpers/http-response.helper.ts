@@ -5,6 +5,6 @@ interface HttpResponse<T> {
   message: T;
 }
 
-export function HttpResponse<T>(code: HttpStatus, message: T): HttpResponse<T> {
+export function httpResponse<T>(code: HttpStatus, message: T): HttpResponse<T> {
   return { code, message };
 }
