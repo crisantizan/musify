@@ -16,7 +16,10 @@ app.set('port', port);
 app.set('environment', env);
 
 // global middlewares
-app.use(express.json()).use(helmet());
+app
+  .use(express.json())
+  .use(express.urlencoded({ extended: false }))
+  .use(helmet());
 
 // use only in development
 if (inDevelopment) {
