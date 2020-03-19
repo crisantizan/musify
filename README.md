@@ -1,16 +1,4 @@
-# Boilerplate Express + TypeScript
-
-### Prerequisites
-
-- Node v10.x.x
-
-### Install
-
-```bash
-$ git clone https://github.com/crisantizan/express-ts-boilerplate
-$ cd express-ts-boilerplate
-$ yarn
-```
+# Musify (MEAN course project)
 
 ### Scripts
 
