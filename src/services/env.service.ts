@@ -6,6 +6,7 @@ import { EnvMode } from '@/typings/shared.typing';
 
 interface EnvConfig {
   PORT: string;
+  MONGO_URI: string;
 }
 
 /** get environment variables */
@@ -31,7 +32,8 @@ export class EnvService {
   /** validate properties */
   private validateInput(envConfig: DotenvParseOutput): EnvConfig {
     const schema = Joi.object({
-      PORT: Joi.number().default(3000),
+      PORT: Joi.number(),
+      MONGO_URI: Joi.string(),
     });
 
     const { error, value } = schema.validate(envConfig);
@@ -56,5 +58,10 @@ export class EnvService {
   /** indicates if app running in development */
   get inDevelopment(): boolean {
     return this.env === 'development';
+  }
+
+  /** mongo uri connection */
+  get mongoUri(): string {
+    return this.envConfig.MONGO_URI;
   }
 }
