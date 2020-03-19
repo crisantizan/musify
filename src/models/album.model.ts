@@ -1,13 +1,13 @@
 import mongoose, { model } from 'mongoose';
-import { Artist } from './artist.model';
+import { ArtistDocument } from './artist.model';
 const { Schema } = mongoose;
 
-export interface Album extends mongoose.Document {
+export interface AlbumDocument extends mongoose.Document {
   title: string;
   description: string;
   year: number;
   cover: string;
-  artist: Artist;
+  artist: ArtistDocument;
 }
 
 const AlbumSchema = new Schema(
@@ -21,4 +21,4 @@ const AlbumSchema = new Schema(
   { timestamps: true },
 );
 
-export default model<Album>('Album', AlbumSchema);
+export default model<AlbumDocument>('Album', AlbumSchema);

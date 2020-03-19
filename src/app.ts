@@ -4,16 +4,14 @@ import morgan from 'morgan';
 import router from '@/routes/router';
 
 import { EnvService } from './services/env.service';
-import { mongoConnect } from './db/conection';
 
 const app = express();
 const { port, inDevelopment, env, mongoUri } = new EnvService();
 
-mongoConnect(mongoUri);
-
 // settings
 app.set('port', port);
 app.set('environment', env);
+app.set('mongoUri', mongoUri);
 
 // global middlewares
 app

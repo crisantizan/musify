@@ -1,7 +1,7 @@
 import mongoose, { model } from 'mongoose';
 const { Schema } = mongoose;
 
-export interface Artist extends mongoose.Document {
+export interface ArtistDocument extends mongoose.Document {
   name: string;
   description: string;
   cover: string;
@@ -16,4 +16,4 @@ const ArtistSchema = new Schema(
   { timestamps: true },
 );
 
-export default model<Artist>('Artist', ArtistSchema);
+export default model<ArtistDocument>('Artist', ArtistSchema);

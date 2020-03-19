@@ -8,3 +8,9 @@ export interface ControllerRouteProps {
   route: string;
   router: Router;
 }
+
+/** mongoose timestamps fields */
+export interface TimestampsFields {
+  createdAt: Date;
+  updatedAt: Date;
+}
