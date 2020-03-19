@@ -17,7 +17,7 @@ export class UsersService {
     if (await this.emailExists(data.email)) {
       return HttpResponse(
         HttpStatus.BAD_REQUEST,
-        `email passed already exists`,
+        'email passed already exists',
       );
     }
 
@@ -27,6 +27,7 @@ export class UsersService {
     return HttpResponse(HttpStatus.CREATED, user);
   }
 
+  /** validate existence of the email passed */
   private async emailExists(email: string) {
     return await UserModel.exists({ email });
   }
