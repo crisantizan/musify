@@ -1,4 +1,5 @@
 import { RoleType } from './shared.typing';
+import { JwtHeader } from 'jsonwebtoken';
 
 /** data saved in jwt payload */
 export interface JwtPayloadData {
@@ -17,4 +18,17 @@ export interface PayloadJwt {
 export interface JwtKeys {
   private: Buffer;
   public: Buffer;
+}
+
+/** data returned by decoded method of jsonwbtoken library */
+export interface DecodedJwtToken {
+  header: JwtHeader;
+  payload: PayloadJwt;
+  signature: string;
+}
+
+/** data returned when verify method is used */
+export interface JwtVerifyData {
+  data: JwtPayloadData;
+  newToken?: string;
 }

@@ -1,7 +1,13 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { JwtPayloadData, PayloadJwt, JwtKeys } from '@/typings/jwt.typing';
-import { SignOptions, sign, verify as verifyToken } from 'jsonwebtoken';
+import {
+  JwtPayloadData,
+  PayloadJwt,
+  JwtKeys,
+  DecodedJwtToken,
+  JwtVerifyData,
+} from '@/typings/jwt.typing';
+import { SignOptions, sign, verify as verifyToken, decode } from 'jsonwebtoken';
 import { RedisService } from './redis.service';
 import { serviceResponse } from '@/helpers/service-response.helper';
 import { HttpStatus } from '@/common/enums';
@@ -23,7 +29,10 @@ export class JwtService {
   }
 
   /** create a new jwt */
-  public async create(data: JwtPayloadData, expiresIn: number | string) {
+  public async create(
+    data: JwtPayloadData,
+    expiresIn: number | string,
+  ): Promise<string> {
     return new Promise((resolve, reject) => {
       const payload: PayloadJwt = { data };
 
@@ -37,7 +46,7 @@ export class JwtService {
   }
 
   /** verify token integrity */
-  public async verify(token: string): Promise<JwtPayloadData> {
+  public async verify(token: string): Promise<JwtVerifyData> {
     try {
       // get user data in token payload
       const { data } = verifyToken(token, this.keys.public, {
@@ -70,7 +79,7 @@ export class JwtService {
         );
       }
 
-      return Promise.resolve(data);
+      return Promise.resolve({ data });
     } catch (err) {
       const expirateErr = 'TokenExpiredError';
 
@@ -85,7 +94,58 @@ export class JwtService {
       }
 
       // generate a new token
-      return Promise.reject();
+      return Promise.resolve(await this.refreshToken(token));
+    }
+  }
+
+  /** generate a new token from another already expired */
+  private async refreshToken(expiredToken: string): Promise<JwtVerifyData> {
+    const {
+      payload: { data: decoded },
+    } = decode(expiredToken, { complete: true }) as DecodedJwtToken;
+
+    // get user redis key
+    const { redisUserKey } = this.redisService.generateUserkey(decoded.id);
+
+    // get user redis token
+    const redisToken = await this.redisService.get(redisUserKey);
+
+    // session has been closed
+    if (!redisToken) {
+      return Promise.reject(
+        serviceResponse(
+          HttpStatus.FORBIDDEN,
+          'invalid token, please login again',
+        ),
+      );
+    }
+
+    // token doesn't corresponds to current user
+    if (redisToken !== expiredToken) {
+      return Promise.reject(
+        serviceResponse(
+          HttpStatus.FORBIDDEN,
+          'token is corrupt, please login again',
+        ),
+      );
+    }
+
+    try {
+      // generate new token
+      const newToken = await this.create(decoded, '15d');
+
+      // update data in redis server
+      await this.redisService.set(redisUserKey, newToken);
+
+      return Promise.resolve({ data: decoded, newToken });
+    } catch (error) {
+      console.error(error);
+      return Promise.reject(
+        serviceResponse(
+          HttpStatus.INTERNAL_SERVER_ERROR,
+          'internal server error',
+        ),
+      );
     }
   }
 }
