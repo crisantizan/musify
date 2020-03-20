@@ -1,5 +1,5 @@
 import mongoose, { model } from 'mongoose';
-import { User } from '@/modules/users/user.type';
+import { User } from '@/modules/user/user.type';
 const { Schema } = mongoose;
 
 export interface UserDocument extends User, mongoose.Document {}

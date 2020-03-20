@@ -1,5 +1,5 @@
 import joi from '@hapi/joi';
-import { UserCreate } from '@/modules/users/user.type';
+import { UserCreate } from '@/modules/user/user.type';
 
 /** joi user schema */
 export const userSchema = joi.object<UserCreate>({
