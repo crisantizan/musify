@@ -1,7 +1,6 @@
 /**
  * import here all controllers
  */
-import { UsersController } from '@/endpoints/users/users.controller';
-import { RolesController } from '@/endpoints/roles/roles.controller';
+import { UserController } from '@/endpoints/users/user.controller';
 
-export default [UsersController, RolesController];
+export default [UserController];

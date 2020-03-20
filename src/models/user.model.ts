@@ -1,5 +1,5 @@
 import mongoose, { model } from 'mongoose';
-import { User } from '@/endpoints/users/users.type';
+import { User } from '@/endpoints/users/user.type';
 const { Schema } = mongoose;
 
 export interface UserDocument extends User, mongoose.Document {}

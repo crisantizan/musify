@@ -1,18 +1,18 @@
 import { Request, Response } from 'express';
 import { Router } from 'express';
 import { Controller } from '@/typings/controller.typing';
-import { UsersService } from './users.service';
+import { UserService } from './user.service';
 import { HttpStatus } from '@/common/enums/http-status.enum';
 import { bodyValidationPipe } from '@/common/http/pipes';
 import { userSchema } from '@/common/joi-schemas';
 
-export class UsersController implements Controller {
+export class UserController implements Controller {
   public router: Router = Router();
   public route: string = '/users';
-  private usersService!: UsersService;
+  private usersService!: UserService;
 
   constructor() {
-    this.usersService = new UsersService();
+    this.usersService = new UserService();
     this.initRoutes();
   }
 

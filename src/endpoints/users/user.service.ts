@@ -1,12 +1,12 @@
 import UserModel, { UserDocument } from '@/models/user.model';
-import { UserCreate, User } from './users.type';
+import { UserCreate } from './user.type';
 import { EncryptService } from '@/services/encrypt.service';
 import { serviceResponse } from '@/helpers/service-response.helper';
 import { HttpStatus } from '@/common/enums/http-status.enum';
 import { errorFieldObject } from '@/helpers/shared.helper';
 import { ServiceResponse } from '@/typings/shared.typing';
 
-export class UsersService {
+export class UserService {
   /** get all users */
   public async getAll(): Promise<ServiceResponse<UserDocument[]>> {
     const users = await UserModel.find();
