@@ -4,7 +4,7 @@ import morgan from 'morgan';
 import router from '@/routes/router';
 
 import { EnvService } from '@/services/env.service';
-import { responseTrasformPipe } from '@/common/pipes';
+import { responseTrasformPipe } from '@/common/http/pipes';
 
 const app = express();
 const { port, inDevelopment, env, mongoUri } = new EnvService();

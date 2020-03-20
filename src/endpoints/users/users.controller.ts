@@ -3,7 +3,7 @@ import { Router } from 'express';
 import { Controller } from '@/typings/controller.typing';
 import { UsersService } from './users.service';
 import { HttpStatus } from '@/common/enums/http-status.enum';
-import { bodyValidationPipe } from '@/common/pipes';
+import { bodyValidationPipe } from '@/common/http/pipes';
 import { userSchema } from '@/common/joi-schemas';
 
 export class UsersController implements Controller {
