@@ -6,9 +6,10 @@
   "scripts": {
     "start": "cross-env NODE_ENV=production node ./build/main.js",
     "serve": "nodemon",
-    "build": "rimraf build && tsc",
+    "build": "rimraf build && tsc && yarn copy:assets",
     "format": "prettier --write \"src/**/*.{ts,json,js}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,json,js}\""
+    "format:check": "prettier --check \"src/**/*.{ts,json,js}\"",
+    "copy:assets": "cpx 'src/assets/**' 'build/assets'"
   },
   "keywords": [
     "express",
