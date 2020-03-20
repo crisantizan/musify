@@ -1,5 +1,5 @@
 import { ObjectSchema, ValidationError } from '@hapi/joi';
-import { httpResponse } from './http-response.helper';
+import { serviceResponse } from './service-response.helper';
 import { HttpStatus } from '@/common/enums/http-status.enum';
 import { errorFieldObject } from './shared.helper';
 
@@ -13,7 +13,7 @@ export async function joiValidator<T>(
       abortEarly: false,
     });
   } catch (error) {
-    throw httpResponse(HttpStatus.BAD_REQUEST, mapErrors(error));
+    throw serviceResponse(HttpStatus.BAD_REQUEST, mapErrors(error));
   }
 }
 

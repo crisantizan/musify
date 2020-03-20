@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import { Router } from 'express';
 
 /** methods and props that all controllers they should have */
 export interface Controller {
@@ -8,6 +8,4 @@ export interface Controller {
   route: string;
   /** method to inicializate routes */
   initRoutes(): void;
-  /** method handle to home route for the controller */
-  index(req: Request, res: Response): void | Response;
 }

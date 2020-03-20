@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { HttpStatus } from '@/common/enums/http-status.enum';
 
 /** environment mode */
 export type EnvMode = 'development' | 'production';
@@ -19,4 +20,10 @@ export interface TimestampsFields {
 export interface ErrorFieldObject {
   field: string;
   message: string;
+}
+
+/** properties to return by a service http */
+export interface ServiceResponse<T> {
+  code: HttpStatus;
+  response: T;
 }

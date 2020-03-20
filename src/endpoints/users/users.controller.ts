@@ -20,7 +20,7 @@ export class UsersController implements Controller {
    * important: use .bind(this) in all methods that you use
    */
   public initRoutes() {
-    this.router.get('/', this.index.bind(this));
+    this.router.get('/', this.getAll.bind(this));
     // create new user
     this.router.post(
       '/',
@@ -30,14 +30,21 @@ export class UsersController implements Controller {
     );
   }
 
-  public index(req: Request, res: Response) {
-    return res.json({ message: this.usersService.getAll() });
-  }
-
+  /** create a new user */
   private async createUser({ body }: Request, res: Response) {
     try {
-      const { code, message } = await this.usersService.save(body);
-      res.status(code).json(message);
+      const { code, response } = await this.usersService.save(body);
+      res.status(code).json(response);
+    } catch (error) {
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(error);
+    }
+  }
+
+  /** get all users */
+  private async getAll(req: Request, res: Response) {
+    try {
+      const { code, response } = await this.usersService.getAll();
+      return res.status(code).json(response);
     } catch (error) {
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(error);
     }

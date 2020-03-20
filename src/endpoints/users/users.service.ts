@@ -1,23 +1,22 @@
 import UserModel, { UserDocument } from '@/models/user.model';
-import { UserCreate } from './users.type';
+import { UserCreate, User } from './users.type';
 import { EncryptService } from '@/services/encrypt.service';
-import { httpResponse } from '@/helpers/http-response.helper';
+import { serviceResponse } from '@/helpers/service-response.helper';
 import { HttpStatus } from '@/common/enums/http-status.enum';
-import { joiValidator } from '@/helpers/joi-validator.helper';
 import { errorFieldObject } from '@/helpers/shared.helper';
+import { ServiceResponse } from '@/typings/shared.typing';
 
 export class UsersService {
-  constructor() {}
-
-  /** get all users simulation */
-  public getAll(): string[] {
-    return ['Juan', 'Álvaro', 'Luis'];
+  /** get all users */
+  public async getAll(): Promise<ServiceResponse<UserDocument[]>> {
+    const users = await UserModel.find();
+    return serviceResponse(HttpStatus.OK, users);
   }
 
   /** save a new user */
   public async save(data: UserCreate) {
     if (await this.emailExists(data.email)) {
-      return httpResponse(
+      return serviceResponse(
         HttpStatus.BAD_REQUEST,
         errorFieldObject('email', 'email passed already exists'),
       );
@@ -27,7 +26,7 @@ export class UsersService {
     const model = new UserModel(data);
     const user = await model.save();
 
-    return httpResponse(HttpStatus.CREATED, user);
+    return serviceResponse(HttpStatus.CREATED, user);
   }
 
   /** validate existence of the email passed */
