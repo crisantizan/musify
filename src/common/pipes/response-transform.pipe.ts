@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 
-/** [middleware] transform all responses */
-export function httpResponseTransformMiddleware(
+/** transform all http responses */
+export function responseTrasformPipe(
   req: Request,
   res: Response,
   next: NextFunction,

@@ -1,11 +1,10 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 import { Router } from 'express';
 import { Controller } from '@/typings/controller.typing';
 import { UsersService } from './users.service';
 import { HttpStatus } from '@/common/enums/http-status.enum';
-import { bodyValidatorMiddleware } from '@/common/middlewares/body-validator-middleware';
+import { bodyValidationPipe } from '@/common/pipes';
 import { userSchema } from '@/common/joi-schemas';
-import { queryParamValidator } from '@/common/validators';
 
 export class UsersController implements Controller {
   public router: Router = Router();
@@ -29,7 +28,7 @@ export class UsersController implements Controller {
     this.router.post(
       '/',
       // validate data received before create user
-      (req, res, next) => bodyValidatorMiddleware(req, res, next, userSchema),
+      (req, res, next) => bodyValidationPipe(req, res, next, userSchema),
       this.createUser.bind(this),
     );
   }

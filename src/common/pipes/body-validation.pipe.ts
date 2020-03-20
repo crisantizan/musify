@@ -3,7 +3,7 @@ import { joiValidator } from '@/helpers/joi-validator.helper';
 import { ObjectSchema } from '@hapi/joi';
 
 /** validate properties of body section */
-export async function bodyValidatorMiddleware<T>(
+export async function bodyValidationPipe<T>(
   req: Request,
   res: Response,
   next: NextFunction,

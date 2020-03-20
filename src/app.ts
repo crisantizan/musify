@@ -3,8 +3,8 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import router from '@/routes/router';
 
-import { EnvService } from './services/env.service';
-import { httpResponseTransformMiddleware } from './common/middlewares/http-response-transform.middleware';
+import { EnvService } from '@/services/env.service';
+import { responseTrasformPipe } from '@/common/pipes';
 
 const app = express();
 const { port, inDevelopment, env, mongoUri } = new EnvService();
@@ -26,7 +26,7 @@ if (inDevelopment) {
 }
 
 /** transform responses */
-app.use(httpResponseTransformMiddleware);
+app.use(responseTrasformPipe);
 
 // this is innecesary, only for example
 app.get('/', (req, res) => {
