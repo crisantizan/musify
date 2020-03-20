@@ -13,6 +13,17 @@ export class UsersService {
     return serviceResponse(HttpStatus.OK, users);
   }
 
+  /** get one user */
+  public async getOne(id: string) {
+    const user = await UserModel.findById(id);
+
+    if (!user) {
+      return serviceResponse(HttpStatus.NOT_FOUND, 'user not found');
+    }
+
+    return serviceResponse(HttpStatus.OK, user);
+  }
+
   /** save a new user */
   public async save(data: UserCreate) {
     if (await this.emailExists(data.email)) {

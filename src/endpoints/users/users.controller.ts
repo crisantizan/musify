@@ -5,6 +5,7 @@ import { UsersService } from './users.service';
 import { HttpStatus } from '@/common/enums/http-status.enum';
 import { bodyValidatorMiddleware } from '@/common/middlewares/body-validator-middleware';
 import { userSchema } from '@/common/joi-schemas';
+import { queryParamValidator } from '@/common/validators';
 
 export class UsersController implements Controller {
   public router: Router = Router();
@@ -20,7 +21,10 @@ export class UsersController implements Controller {
    * important: use .bind(this) in all methods that you use
    */
   public initRoutes() {
+    // get all users
     this.router.get('/', this.getAll.bind(this));
+    // get one user
+    this.router.get('/:id', this.getOne.bind(this));
     // create new user
     this.router.post(
       '/',
@@ -44,6 +48,16 @@ export class UsersController implements Controller {
   private async getAll(req: Request, res: Response) {
     try {
       const { code, response } = await this.usersService.getAll();
+      return res.status(code).json(response);
+    } catch (error) {
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(error);
+    }
+  }
+
+  /** get all users */
+  private async getOne(req: Request, res: Response) {
+    try {
+      const { code, response } = await this.usersService.getOne(req.params.id);
       return res.status(code).json(response);
     } catch (error) {
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(error);
