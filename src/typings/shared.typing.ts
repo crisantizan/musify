@@ -14,3 +14,9 @@ export interface TimestampsFields {
   createdAt: Date;
   updatedAt: Date;
 }
+
+/** props to return (for every field) when error has ocurred in a field */
+export interface ErrorFieldObject {
+  field: string;
+  message: string;
+}

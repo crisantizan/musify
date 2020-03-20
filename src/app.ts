@@ -4,7 +4,7 @@ import morgan from 'morgan';
 import router from '@/routes/router';
 
 import { EnvService } from './services/env.service';
-import { HttpResponseTransformMiddleware } from './common/middlewares/http-response-transform.middleware';
+import { httpResponseTransformMiddleware } from './common/middlewares/http-response-transform.middleware';
 
 const app = express();
 const { port, inDevelopment, env, mongoUri } = new EnvService();
@@ -26,7 +26,7 @@ if (inDevelopment) {
 }
 
 /** transform responses */
-app.use(HttpResponseTransformMiddleware);
+app.use(httpResponseTransformMiddleware);
 
 // this is innecesary, only for example
 app.get('/', (req, res) => {

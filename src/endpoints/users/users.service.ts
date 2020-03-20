@@ -3,6 +3,8 @@ import { UserCreate } from './users.type';
 import { EncryptService } from '@/services/encrypt.service';
 import { httpResponse } from '@/helpers/http-response.helper';
 import { HttpStatus } from '@/common/enums/http-status.enum';
+import { joiValidator } from '@/helpers/joi-validator.helper';
+import { errorFieldObject } from '@/helpers/shared.helper';
 
 export class UsersService {
   constructor() {}
@@ -17,7 +19,7 @@ export class UsersService {
     if (await this.emailExists(data.email)) {
       return httpResponse(
         HttpStatus.BAD_REQUEST,
-        'email passed already exists',
+        errorFieldObject('email', 'email passed already exists'),
       );
     }
 

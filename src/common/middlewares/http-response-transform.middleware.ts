@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 
 /** [middleware] transform all responses */
-export function HttpResponseTransformMiddleware(
+export function httpResponseTransformMiddleware(
   req: Request,
   res: Response,
   next: NextFunction,
@@ -9,7 +9,7 @@ export function HttpResponseTransformMiddleware(
   const { send } = res;
 
   res.send = function(body) {
-    const [method, timestamp, path, status, data] = [
+    const [method, timestamp, path, status, response] = [
       req.method,
       new Date(),
       req.path,
@@ -19,7 +19,7 @@ export function HttpResponseTransformMiddleware(
 
     return send.call(
       this,
-      JSON.stringify({ method, timestamp, path, status, data }),
+      JSON.stringify({ method, timestamp, path, status, response }),
     );
   };
 

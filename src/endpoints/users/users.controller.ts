@@ -1,8 +1,10 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { Router } from 'express';
 import { Controller } from '@/typings/controller.typing';
 import { UsersService } from './users.service';
 import { HttpStatus } from '@/common/enums/http-status.enum';
+import { bodyValidatorMiddleware } from '@/common/middlewares/body-validator-middleware';
+import { userSchema } from '@/common/joi-schemas';
 
 export class UsersController implements Controller {
   public router: Router = Router();
@@ -19,14 +21,20 @@ export class UsersController implements Controller {
    */
   public initRoutes() {
     this.router.get('/', this.index.bind(this));
-    this.router.post('/', this.createUser.bind(this));
+    // create new user
+    this.router.post(
+      '/',
+      // validate data received before create user
+      (req, res, next) => bodyValidatorMiddleware(req, res, next, userSchema),
+      this.createUser.bind(this),
+    );
   }
 
   public index(req: Request, res: Response) {
     return res.json({ message: this.usersService.getAll() });
   }
 
-  public async createUser({ body }: Request, res: Response) {
+  private async createUser({ body }: Request, res: Response) {
     try {
       const { code, message } = await this.usersService.save(body);
       res.status(code).json(message);
