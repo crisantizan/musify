@@ -27,3 +27,6 @@ export interface ServiceResponse<T> {
   code: HttpStatus;
   response: T;
 }
+
+/** roles allowed values */
+export type RoleType = 'ADMIN' | 'USER';
