@@ -1,5 +1,6 @@
 import joi from '@hapi/joi';
 import { UserCreate } from '@/modules/user/user.type';
+import { Role } from '../enums';
 
 /** joi user schema */
 export const userSchema = joi.object<UserCreate>({
@@ -10,6 +11,6 @@ export const userSchema = joi.object<UserCreate>({
     .string()
     .required()
     .email(),
-  role: joi.string().required(),
+  role: joi.string().required().equal(Role.ADMIN, Role.USER),
   image: joi.string().empty(),
 });
