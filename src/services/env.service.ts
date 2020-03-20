@@ -5,8 +5,10 @@ import { getEnvVariablesPath } from '@/helpers/shared.helper';
 import { EnvMode } from '@/typings/shared.typing';
 
 interface EnvConfig {
-  PORT: string;
+  HOST: string;
+  PORT: number;
   MONGO_URI: string;
+  REDIS_PORT: number;
 }
 
 /** get environment variables */
@@ -32,8 +34,14 @@ export class EnvService {
   /** validate properties */
   private validateInput(envConfig: DotenvParseOutput): EnvConfig {
     const schema = Joi.object({
-      PORT: Joi.number(),
-      MONGO_URI: Joi.string(),
+      HOST: Joi.string()
+        .default('localhost')
+        .required(),
+      PORT: Joi.number().required(),
+      MONGO_URI: Joi.string().required(),
+      REDIS_PORT: Joi.number()
+        .default(6379)
+        .required(),
     });
 
     const { error, value } = schema.validate(envConfig);
@@ -45,9 +53,14 @@ export class EnvService {
     return value;
   }
 
+  /** app host */
+  get host(): string {
+    return this.envConfig.HOST;
+  }
+
   /** app port */
   get port(): number {
-    return Number(this.envConfig.PORT);
+    return this.envConfig.PORT;
   }
 
   /** environment */
@@ -63,5 +76,10 @@ export class EnvService {
   /** mongo uri connection */
   get mongoUri(): string {
     return this.envConfig.MONGO_URI;
+  }
+
+  /** redis port */
+  get redisPort(): number {
+    return this.envConfig.REDIS_PORT;
   }
 }
