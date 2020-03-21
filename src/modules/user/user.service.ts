@@ -44,4 +44,9 @@ export class UserService {
   private async emailExists(email: string) {
     return await UserModel.exists({ email });
   }
+
+  /** user login */
+  private async login() {
+    
+  }
 }

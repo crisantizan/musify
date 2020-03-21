@@ -4,7 +4,7 @@ import { Controller } from '@/typings/controller.typing';
 import { UserService } from './user.service';
 import { HttpStatus } from '@/common/enums/http-status.enum';
 import { bodyValidationPipe } from '@/common/http/pipes';
-import { userSchema } from '@/common/joi-schemas';
+import { userSchema, userLoginSchema } from '@/common/joi-schemas';
 
 export class UserController implements Controller {
   public router: Router = Router();
@@ -20,6 +20,7 @@ export class UserController implements Controller {
    * important: use .bind(this) in all methods that you use
    */
   public initRoutes() {
+    /** ----- GET ----- */
     // get all users
     this.router.get('/', this.getAll.bind(this));
     // get one user
@@ -30,6 +31,15 @@ export class UserController implements Controller {
       // validate data received before create user
       (req, res, next) => bodyValidationPipe(req, res, next, userSchema),
       this.createUser.bind(this),
+    );
+
+    /** ----- POST ----- */
+    // user login
+    this.router.post(
+      '/login',
+      // validate data received
+      (req, res, next) => bodyValidationPipe(req, res, next, userLoginSchema),
+      this.login.bind(this),
     );
   }
 
@@ -43,7 +53,7 @@ export class UserController implements Controller {
     }
   }
 
-  /** get all users */
+  /** [GET] get all users */
   private async getAll(req: Request, res: Response) {
     try {
       const { code, response } = await this.usersService.getAll();
@@ -53,7 +63,7 @@ export class UserController implements Controller {
     }
   }
 
-  /** get all users */
+  /** [GET] get all users */
   private async getOne(req: Request, res: Response) {
     try {
       const { code, response } = await this.usersService.getOne(req.params.id);
@@ -61,5 +71,11 @@ export class UserController implements Controller {
     } catch (error) {
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(error);
     }
+  }
+
+  /** [POST] login */
+  private async login(req: Request, res: Response) {
+    console.log(req.body);
+    res.status(200).json({ message: 'hola' });
   }
 }

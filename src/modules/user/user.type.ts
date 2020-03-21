@@ -12,3 +12,9 @@ export interface UserCreate {
 
 /** complete data of user */
 export interface User extends UserCreate, TimestampsFields {}
+
+/** user login data */
+export interface UserLogin {
+  email: string;
+  password: string;
+}

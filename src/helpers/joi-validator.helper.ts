@@ -19,6 +19,6 @@ export async function joiValidator<T>(
 
 function mapErrors(error: ValidationError) {
   return error.details.map(err =>
-    errorFieldObject(err.context?.label!, err.message),
+    errorFieldObject(err.context?.label!, err.message.replace(/["]+/g, '')),
   );
 }

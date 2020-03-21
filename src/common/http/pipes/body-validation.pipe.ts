@@ -15,6 +15,6 @@ export async function bodyValidationPipe<T>(
     req.body = data;
     next();
   } catch (error) {
-    res.status(error.code).json(error.message);
+    res.status(error.code).json(error.response);
   }
 }
