@@ -68,10 +68,10 @@ export class UserService extends Service {
       throw this.response(HttpStatus.FORBIDDEN, 'incorrect credentials');
     }
 
-    // create token for 20 days
+    // create token for 15 days
     const token = await this.jwtService.create(
       { id: user.id, role: user.role },
-      60,
+      '15d',
     );
 
     const { redisUserKey } = this.redisService.generateUserkey(user.id);

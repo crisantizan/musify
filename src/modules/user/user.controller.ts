@@ -6,7 +6,6 @@ import { bodyValidationPipe } from '@/common/http/pipes';
 import { userSchema, userLoginSchema } from '@/common/joi-schemas';
 import { UserLogin } from './user.type';
 import { Controller } from '../controller';
-import { authGuard } from '@/common/http/guards/auth.guard';
 
 export class UserController extends Controller implements IController {
   public router: Router = Router();
@@ -27,7 +26,7 @@ export class UserController extends Controller implements IController {
     /** ----- GET ----- */
     // get all users
     this.router
-      .get('/', authGuard, this.getAll.bind(this))
+      .get('/', this.getAll.bind(this))
       // get one user
       .get('/:id', this.getOne.bind(this))
       // create new user
@@ -61,7 +60,6 @@ export class UserController extends Controller implements IController {
   /** [GET] get all users */
   private async getAll(req: Request, res: Response) {
     try {
-      console.log('user data: ', req.user);
       const { code, response } = await this.usersService.getAll();
       return res.status(code).json(response);
     } catch (error) {
