@@ -1,5 +1,5 @@
 import UserModel, { UserDocument } from '@/models/user.model';
-import { UserCreate } from './user.type';
+import { UserCreate, UserLogin } from './user.type';
 import { EncryptService } from '@/services/encrypt.service';
 import { serviceResponse } from '@/helpers/service-response.helper';
 import { HttpStatus } from '@/common/enums/http-status.enum';
@@ -46,7 +46,17 @@ export class UserService {
   }
 
   /** user login */
-  private async login() {
-    
+  public async login({ email, password }: UserLogin) {
+    const user = await UserModel.findOne({ email });
+
+    if (!user) {
+      return serviceResponse(HttpStatus.NOT_FOUND, 'user not found');
+    }
+
+    if (!EncryptService.compareHash(password, user.password)) {
+      return serviceResponse(HttpStatus.FORBIDDEN, 'incorrect credentials');
+    }
+
+    return serviceResponse(HttpStatus.OK, user);
   }
 }

@@ -5,6 +5,7 @@ import { UserService } from './user.service';
 import { HttpStatus } from '@/common/enums/http-status.enum';
 import { bodyValidationPipe } from '@/common/http/pipes';
 import { userSchema, userLoginSchema } from '@/common/joi-schemas';
+import { UserLogin } from './user.type';
 
 export class UserController implements Controller {
   public router: Router = Router();
@@ -74,8 +75,15 @@ export class UserController implements Controller {
   }
 
   /** [POST] login */
-  private async login(req: Request, res: Response) {
-    console.log(req.body);
-    res.status(200).json({ message: 'hola' });
+  private async login({ body }: Request, res: Response) {
+    try {
+      const { code, response } = await this.usersService.login(
+        body as UserLogin,
+      );
+
+      return res.status(code).json(response);
+    } catch (error) {
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(error);
+    }
   }
 }
