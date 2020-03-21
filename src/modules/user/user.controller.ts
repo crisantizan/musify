@@ -6,14 +6,18 @@ import { HttpStatus } from '@/common/enums/http-status.enum';
 import { bodyValidationPipe } from '@/common/http/pipes';
 import { userSchema, userLoginSchema } from '@/common/joi-schemas';
 import { UserLogin } from './user.type';
+import { JwtService } from '@/services/jwt.service';
+import { ServiceResponse } from '@/typings/shared.typing';
 
 export class UserController implements Controller {
   public router: Router = Router();
   public route: string = '/users';
   private usersService!: UserService;
+  private readonly jwtService!: JwtService;
 
   constructor() {
     this.usersService = new UserService();
+    this.jwtService = new JwtService();
     this.initRoutes();
   }
 
@@ -81,8 +85,17 @@ export class UserController implements Controller {
         body as UserLogin,
       );
 
+      // this.jwtService.create({ id: response })
+
       return res.status(code).json(response);
     } catch (error) {
+      // custom error
+      if (error.hasOwnProperty('code')) {
+        const { code, response } = error as ServiceResponse<string>;
+        return res.status(code).json(response);
+      }
+
+      // internal server error
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(error);
     }
   }

@@ -50,11 +50,11 @@ export class UserService {
     const user = await UserModel.findOne({ email });
 
     if (!user) {
-      return serviceResponse(HttpStatus.NOT_FOUND, 'user not found');
+      throw serviceResponse(HttpStatus.NOT_FOUND, 'user not found');
     }
 
     if (!EncryptService.compareHash(password, user.password)) {
-      return serviceResponse(HttpStatus.FORBIDDEN, 'incorrect credentials');
+      throw serviceResponse(HttpStatus.FORBIDDEN, 'incorrect credentials');
     }
 
     return serviceResponse(HttpStatus.OK, user);
