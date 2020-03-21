@@ -1,7 +1,7 @@
 import { Router } from 'express';
 
 /** methods and props that all controllers they should have */
-export interface Controller {
+export interface IController {
   /** express router */
   router: Router;
   /** route name that handle the controller */

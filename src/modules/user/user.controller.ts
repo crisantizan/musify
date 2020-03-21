@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { Router } from 'express';
-import { Controller } from '@/typings/controller.typing';
+import { IController } from '@/typings/controller.typing';
 import { UserService } from './user.service';
 import { HttpStatus } from '@/common/enums/http-status.enum';
 import { bodyValidationPipe } from '@/common/http/pipes';
@@ -8,14 +8,17 @@ import { userSchema, userLoginSchema } from '@/common/joi-schemas';
 import { UserLogin } from './user.type';
 import { JwtService } from '@/services/jwt.service';
 import { ServiceResponse } from '@/typings/shared.typing';
+import { Controller } from '../controller';
 
-export class UserController implements Controller {
+export class UserController extends Controller implements IController {
   public router: Router = Router();
   public route: string = '/users';
   private usersService!: UserService;
   private readonly jwtService!: JwtService;
 
   constructor() {
+    super();
+
     this.usersService = new UserService();
     this.jwtService = new JwtService();
     this.initRoutes();
@@ -89,14 +92,7 @@ export class UserController implements Controller {
 
       return res.status(code).json(response);
     } catch (error) {
-      // custom error
-      if (error.hasOwnProperty('code')) {
-        const { code, response } = error as ServiceResponse<string>;
-        return res.status(code).json(response);
-      }
-
-      // internal server error
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(error);
+      this.handleError(error, res);
     }
   }
 }
