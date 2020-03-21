@@ -61,21 +61,17 @@ export class JwtService {
 
       // session has been closes
       if (!redisToken) {
-        return Promise.reject(
-          serviceResponse(
-            HttpStatus.FORBIDDEN,
-            'invalid token, please login again',
-          ),
+        throw serviceResponse(
+          HttpStatus.FORBIDDEN,
+          'invalid token, please login again',
         );
       }
 
       // token is corrupt or expired
       if (redisToken !== token) {
-        return Promise.reject(
-          serviceResponse(
-            HttpStatus.FORBIDDEN,
-            'token is corrupt, please login again',
-          ),
+        throw serviceResponse(
+          HttpStatus.FORBIDDEN,
+          'token is corrupt, please login again',
         );
       }
 
@@ -85,11 +81,9 @@ export class JwtService {
 
       // token is corrupt
       if (err.name !== expirateErr) {
-        return Promise.reject(
-          serviceResponse(
-            HttpStatus.FORBIDDEN,
-            'invalid token, please login again',
-          ),
+        throw serviceResponse(
+          HttpStatus.FORBIDDEN,
+          'invalid token, please login again',
         );
       }
 
@@ -112,21 +106,17 @@ export class JwtService {
 
     // session has been closed
     if (!redisToken) {
-      return Promise.reject(
-        serviceResponse(
-          HttpStatus.FORBIDDEN,
-          'invalid token, please login again',
-        ),
+      throw serviceResponse(
+        HttpStatus.FORBIDDEN,
+        'invalid token, please login again',
       );
     }
 
     // token doesn't corresponds to current user
     if (redisToken !== expiredToken) {
-      return Promise.reject(
-        serviceResponse(
-          HttpStatus.FORBIDDEN,
-          'token is corrupt, please login again',
-        ),
+      throw serviceResponse(
+        HttpStatus.FORBIDDEN,
+        'token is corrupt, please login again',
       );
     }
 
@@ -140,11 +130,10 @@ export class JwtService {
       return Promise.resolve({ data: decoded, newToken });
     } catch (error) {
       console.error(error);
-      return Promise.reject(
-        serviceResponse(
-          HttpStatus.INTERNAL_SERVER_ERROR,
-          'internal server error',
-        ),
+
+      throw serviceResponse(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        'internal server error',
       );
     }
   }

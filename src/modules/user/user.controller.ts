@@ -6,6 +6,7 @@ import { bodyValidationPipe } from '@/common/http/pipes';
 import { userSchema, userLoginSchema } from '@/common/joi-schemas';
 import { UserLogin } from './user.type';
 import { Controller } from '../controller';
+import { authGuard } from '@/common/http/guards/auth.guard';
 
 export class UserController extends Controller implements IController {
   public router: Router = Router();
@@ -25,7 +26,7 @@ export class UserController extends Controller implements IController {
   public initRoutes() {
     /** ----- GET ----- */
     // get all users
-    this.router.get('/', this.getAll.bind(this));
+    this.router.get('/', authGuard, this.getAll.bind(this));
     // get one user
     this.router.get('/:id', this.getOne.bind(this));
     // create new user

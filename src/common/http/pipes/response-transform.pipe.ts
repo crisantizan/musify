@@ -6,21 +6,34 @@ export function responseTrasformPipe(
   res: Response,
   next: NextFunction,
 ) {
-  const { send } = res;
+  const { json } = res;
 
-  res.send = function(body) {
+  // res.send = function(body) {
+  //   console.log(body, typeof body);
+  //   const s = { body };
+  //   const [method, timestamp, path, status, response] = [
+  //     req.method,
+  //     new Date(),
+  //     req.path,
+  //     res.statusCode,
+  //     typeof body === 'string' ? body : JSON.parse(body),
+  //   ];
+
+  //   const x = JSON.stringify({ method, timestamp, path, status, response });
+
+  //   return send.call(this, x);
+  // };
+
+  res.json = function(body) {
     const [method, timestamp, path, status, response] = [
       req.method,
       new Date(),
       req.path,
       res.statusCode,
-      JSON.parse(body),
+      body,
     ];
 
-    return send.call(
-      this,
-      JSON.stringify({ method, timestamp, path, status, response }),
-    );
+    return json.call(this, { method, timestamp, path, status, response });
   };
 
   next();
