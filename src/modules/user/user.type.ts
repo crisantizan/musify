@@ -1,4 +1,4 @@
-import { TimestampsFields } from '@/typings/shared.typing';
+import { TimestampsFields, RoleType } from '@/typings/shared.typing';
 
 /** data to create a new user */
 export interface UserCreate {
@@ -6,7 +6,7 @@ export interface UserCreate {
   surname: string;
   password: string;
   email: string;
-  role: string;
+  role: RoleType;
   image?: string;
 }
 

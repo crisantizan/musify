@@ -5,20 +5,17 @@ import { UserService } from './user.service';
 import { bodyValidationPipe } from '@/common/http/pipes';
 import { userSchema, userLoginSchema } from '@/common/joi-schemas';
 import { UserLogin } from './user.type';
-import { JwtService } from '@/services/jwt.service';
 import { Controller } from '../controller';
 
 export class UserController extends Controller implements IController {
   public router: Router = Router();
   public route: string = '/users';
   private usersService!: UserService;
-  private readonly jwtService!: JwtService;
 
   constructor() {
     super();
 
     this.usersService = new UserService();
-    this.jwtService = new JwtService();
     this.initRoutes();
   }
 
@@ -85,8 +82,6 @@ export class UserController extends Controller implements IController {
       const { code, response } = await this.usersService.login(
         body as UserLogin,
       );
-
-      // this.jwtService.create({ id: response })
 
       return res.status(code).json(response);
     } catch (error) {

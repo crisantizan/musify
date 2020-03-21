@@ -16,4 +16,6 @@ const UserSchema = new Schema(
   { timestamps: true },
 );
 
+UserSchema.set('toJSON', { virtuals: true });
+
 export default model<UserDocument>('User', UserSchema);

@@ -5,8 +5,19 @@ import { HttpStatus } from '@/common/enums/http-status.enum';
 import { errorFieldObject } from '@/helpers/shared.helper';
 import { ServiceResponse } from '@/typings/shared.typing';
 import { Service } from '@/services/service';
+import { JwtService } from '@/services/jwt.service';
+import { RedisService } from '@/services/redis.service';
 
 export class UserService extends Service {
+  private readonly jwtService!: JwtService;
+  private readonly redisService!: RedisService;
+
+  constructor() {
+    super();
+
+    this.jwtService = new JwtService();
+    this.redisService = new RedisService();
+  }
   /** get all users */
   public async getAll(): Promise<ServiceResponse<UserDocument[]>> {
     const users = await UserModel.find();
@@ -57,6 +68,17 @@ export class UserService extends Service {
       throw this.response(HttpStatus.FORBIDDEN, 'incorrect credentials');
     }
 
-    return this.response(HttpStatus.OK, user);
+    // create token for 20 days
+    const token = await this.jwtService.create(
+      { id: user.id, role: user.role },
+      '15d',
+    );
+
+    const { redisUserKey } = this.redisService.generateUserkey(user.id);
+
+    // save token in redis
+    await this.redisService.set(redisUserKey, token);
+
+    return this.response(HttpStatus.OK, { user, token });
   }
 }
