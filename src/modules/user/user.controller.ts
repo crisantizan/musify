@@ -2,12 +2,10 @@ import { Request, Response } from 'express';
 import { Router } from 'express';
 import { IController } from '@/typings/controller.typing';
 import { UserService } from './user.service';
-import { HttpStatus } from '@/common/enums/http-status.enum';
 import { bodyValidationPipe } from '@/common/http/pipes';
 import { userSchema, userLoginSchema } from '@/common/joi-schemas';
 import { UserLogin } from './user.type';
 import { JwtService } from '@/services/jwt.service';
-import { ServiceResponse } from '@/typings/shared.typing';
 import { Controller } from '../controller';
 
 export class UserController extends Controller implements IController {
@@ -57,7 +55,7 @@ export class UserController extends Controller implements IController {
       const { code, response } = await this.usersService.save(body);
       res.status(code).json(response);
     } catch (error) {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(error);
+      this.handleError(error, res);
     }
   }
 
@@ -67,7 +65,7 @@ export class UserController extends Controller implements IController {
       const { code, response } = await this.usersService.getAll();
       return res.status(code).json(response);
     } catch (error) {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(error);
+      this.handleError(error, res);
     }
   }
 
@@ -77,7 +75,7 @@ export class UserController extends Controller implements IController {
       const { code, response } = await this.usersService.getOne(req.params.id);
       return res.status(code).json(response);
     } catch (error) {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(error);
+      this.handleError(error, res);
     }
   }
 

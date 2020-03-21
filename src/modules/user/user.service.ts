@@ -18,7 +18,7 @@ export class UserService extends Service {
     const user = await UserModel.findById(id);
 
     if (!user) {
-      return this.response(HttpStatus.NOT_FOUND, 'user not found');
+      throw this.response(HttpStatus.NOT_FOUND, 'user not found');
     }
 
     return this.response(HttpStatus.OK, user);
@@ -27,7 +27,7 @@ export class UserService extends Service {
   /** save a new user */
   public async save(data: UserCreate) {
     if (await this.emailExists(data.email)) {
-      return this.response(
+      throw this.response(
         HttpStatus.BAD_REQUEST,
         errorFieldObject('email', 'email passed already exists'),
       );
