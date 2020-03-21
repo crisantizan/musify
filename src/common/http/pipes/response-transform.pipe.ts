@@ -8,22 +8,6 @@ export function responseTrasformPipe(
 ) {
   const { json } = res;
 
-  // res.send = function(body) {
-  //   console.log(body, typeof body);
-  //   const s = { body };
-  //   const [method, timestamp, path, status, response] = [
-  //     req.method,
-  //     new Date(),
-  //     req.path,
-  //     res.statusCode,
-  //     typeof body === 'string' ? body : JSON.parse(body),
-  //   ];
-
-  //   const x = JSON.stringify({ method, timestamp, path, status, response });
-
-  //   return send.call(this, x);
-  // };
-
   res.json = function(body) {
     const [method, timestamp, path, status, response] = [
       req.method,

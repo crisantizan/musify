@@ -14,7 +14,6 @@ export async function authGuard(
   const header = req.headers['authorization'];
 
   if (!header) {
-    console.log('sin cabecera');
     return res
       .status(HttpStatus.BAD_REQUEST)
       .json('authorization header is required');
@@ -38,7 +37,6 @@ export async function authGuard(
   // validate token integrity
   try {
     const { data, newToken } = await jwtService.verify(token);
-    console.log({ data, newToken });
     // publish user data in the request object
     req.user = data;
     // if there is new token

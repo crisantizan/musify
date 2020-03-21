@@ -26,25 +26,26 @@ export class UserController extends Controller implements IController {
   public initRoutes() {
     /** ----- GET ----- */
     // get all users
-    this.router.get('/', authGuard, this.getAll.bind(this));
-    // get one user
-    this.router.get('/:id', this.getOne.bind(this));
-    // create new user
-    this.router.post(
-      '/',
-      // validate data received before create user
-      (req, res, next) => bodyValidationPipe(req, res, next, userSchema),
-      this.createUser.bind(this),
-    );
+    this.router
+      .get('/', authGuard, this.getAll.bind(this))
+      // get one user
+      .get('/:id', this.getOne.bind(this))
+      // create new user
+      .post(
+        '/',
+        // validate data received before create user
+        (req, res, next) => bodyValidationPipe(req, res, next, userSchema),
+        this.createUser.bind(this),
+      )
 
-    /** ----- POST ----- */
-    // user login
-    this.router.post(
-      '/login',
-      // validate data received
-      (req, res, next) => bodyValidationPipe(req, res, next, userLoginSchema),
-      this.login.bind(this),
-    );
+      /** ----- POST ----- */
+      // user login
+      .post(
+        '/login',
+        // validate data received
+        (req, res, next) => bodyValidationPipe(req, res, next, userLoginSchema),
+        this.login.bind(this),
+      );
   }
 
   /** create a new user */
@@ -60,6 +61,7 @@ export class UserController extends Controller implements IController {
   /** [GET] get all users */
   private async getAll(req: Request, res: Response) {
     try {
+      console.log('user data: ', req.user);
       const { code, response } = await this.usersService.getAll();
       return res.status(code).json(response);
     } catch (error) {

@@ -71,7 +71,7 @@ export class UserService extends Service {
     // create token for 20 days
     const token = await this.jwtService.create(
       { id: user.id, role: user.role },
-      '15d',
+      60,
     );
 
     const { redisUserKey } = this.redisService.generateUserkey(user.id);

@@ -33,20 +33,21 @@ export class JwtService {
     data: JwtPayloadData,
     expiresIn: number | string,
   ): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const payload: PayloadJwt = { data };
+    const payload: PayloadJwt = { data };
 
-      const options: SignOptions = {
-        algorithm: 'RS256',
-        expiresIn,
-      };
+    const options: SignOptions = {
+      algorithm: 'RS256',
+      expiresIn,
+    };
 
-      return resolve(sign(payload, this.keys.private, options));
-    });
+    return Promise.resolve(sign(payload, this.keys.private, options));
   }
 
   /** verify token integrity */
-  public async verify(token: string): Promise<JwtVerifyData> {
+  public async verify(
+    token: string,
+    newTokenExpiresIn?: string | number,
+  ): Promise<JwtVerifyData> {
     try {
       // get user data in token payload
       const { data } = verifyToken(token, this.keys.public, {
@@ -59,7 +60,7 @@ export class JwtService {
       // get user redis token
       const redisToken = await this.redisService.get(redisUserKey);
 
-      // session has been closes
+      // user don't have token in redis
       if (!redisToken) {
         throw serviceResponse(
           HttpStatus.FORBIDDEN,
@@ -67,8 +68,11 @@ export class JwtService {
         );
       }
 
-      // token is corrupt or expired
+      // token doesn't corresponds to the current user
       if (redisToken !== token) {
+        // delete
+        await this.redisService.del(redisUserKey);
+
         throw serviceResponse(
           HttpStatus.FORBIDDEN,
           'token is corrupt, please login again',
@@ -83,17 +87,20 @@ export class JwtService {
       if (err.name !== expirateErr) {
         throw serviceResponse(
           HttpStatus.FORBIDDEN,
-          'invalid token, please login again',
+          'this token already has been used, please login again',
         );
       }
 
       // generate a new token
-      return Promise.resolve(await this.refreshToken(token));
+      return Promise.resolve(await this.refreshToken(token, newTokenExpiresIn));
     }
   }
 
   /** generate a new token from another already expired */
-  private async refreshToken(expiredToken: string): Promise<JwtVerifyData> {
+  private async refreshToken(
+    expiredToken: string,
+    expiresIn: string | number = '15d',
+  ): Promise<JwtVerifyData> {
     const {
       payload: { data: decoded },
     } = decode(expiredToken, { complete: true }) as DecodedJwtToken;
@@ -114,15 +121,18 @@ export class JwtService {
 
     // token doesn't corresponds to current user
     if (redisToken !== expiredToken) {
+      // delete
+      await this.redisService.del(redisUserKey);
+
       throw serviceResponse(
         HttpStatus.FORBIDDEN,
-        'token is corrupt, please login again',
+        'this token already has been used, please login again',
       );
     }
 
     try {
       // generate new token
-      const newToken = await this.create(decoded, '15d');
+      const newToken = await this.create(decoded, expiresIn);
 
       // update data in redis server
       await this.redisService.set(redisUserKey, newToken);
