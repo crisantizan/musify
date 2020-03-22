@@ -15,7 +15,7 @@ export function errorFieldObject(
 }
 
 /** generate random string */
-function generateToken(length: number = 4, addDate = false): string {
+export function generateToken(length: number = 4, addDate = false): string {
   let randomString = '';
   const charts =
     'aAbB0cCd#DeE1fFgGh2HiIjJ3kK$l4LmM5nNoOp6Pq-QrR7sStT8uUv_VwW9xXyYzZ';
@@ -34,7 +34,7 @@ function generateToken(length: number = 4, addDate = false): string {
       .split(':')
       .join('-');
 
-    randomString = `${dateString}T${time}_${randomString}`;
+    randomString = `${dateString}UTC${time}-${randomString}`;
   }
 
   return randomString;
