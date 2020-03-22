@@ -8,6 +8,7 @@ import { UserLogin } from './user.type';
 import { Controller } from '../controller';
 import { authGuard } from '@/common/http/guards/auth.guard';
 import { multerMiddleware } from '@/common/http/middlewares/multer.middleware';
+import { multerImageFilter } from '@/helpers/multer.helper';
 
 export class UserController extends Controller implements IController {
   public router: Router = Router();
@@ -44,7 +45,7 @@ export class UserController extends Controller implements IController {
       // upload user avatar
       .post(
         '/upload-avatar/:userId',
-        multerMiddleware('avatars').single('avatar'),
+        multerMiddleware('avatars', multerImageFilter).single('avatar'),
         this.uploadAvatar.bind(this),
       )
       // user login
