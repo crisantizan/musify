@@ -4,7 +4,10 @@ import { generateToken } from '@/helpers/shared.helper';
 
 type FolderType = 'avatars' | 'covers' | 'sounds';
 
-export function multerMiddleware(folder: FolderType) {
+export function multerMiddleware(
+  folder: FolderType,
+  filter?: multer.Options['fileFilter'],
+) {
   const destination = join(
     __dirname,
     '..',
@@ -25,5 +28,5 @@ export function multerMiddleware(folder: FolderType) {
     },
   });
 
-  return multer({ storage });
+  return multer({ storage, fileFilter: filter });
 }
