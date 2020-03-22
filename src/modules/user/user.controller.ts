@@ -7,6 +7,7 @@ import { userSchema, userLoginSchema } from '@/common/joi-schemas';
 import { UserLogin } from './user.type';
 import { Controller } from '../controller';
 import { authGuard } from '@/common/http/guards/auth.guard';
+import { multerMiddleware } from '@/common/http/middlewares/multer.middleware';
 
 export class UserController extends Controller implements IController {
   public router: Router = Router();
@@ -40,6 +41,12 @@ export class UserController extends Controller implements IController {
       )
 
       /** ----- POST ----- */
+      // upload user avatar
+      .post(
+        '/upload-avatar/:userId',
+        multerMiddleware('avatars').single('avatar'),
+        this.uploadAvatar.bind(this),
+      )
       // user login
       .post(
         '/login',
@@ -77,6 +84,12 @@ export class UserController extends Controller implements IController {
     } catch (error) {
       this.handleError(error, res);
     }
+  }
+
+  /** [POST] upload user avatar */
+  private async uploadAvatar(req: Request, res: Response) {
+    // console.log({ file: req.file, userId: req.params });
+    res.json('works!');
   }
 
   /** [POST] login */
