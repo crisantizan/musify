@@ -1,6 +1,7 @@
 import express from 'express';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import cors from 'cors';
 import router from '@/routes/router';
 
 import { EnvService } from '@/services/env.service';
@@ -16,6 +17,10 @@ app.set('mongoUri', mongoUri);
 
 // global middlewares
 app
+  .use(cors({
+    origin: ['http://localhost:4200'],
+    exposedHeaders: 'x-token'
+  }))
   .use(express.json())
   .use(express.urlencoded({ extended: false }))
   .use(helmet());
