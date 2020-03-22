@@ -1,5 +1,6 @@
 import multer from 'multer';
-import { serviceResponse } from './service-response.helper';
+import { HttpException } from '@/common/http/exceptions/http.exception';
+import { HttpStatus } from '@/common/enums';
 
 export const multerImageFilter: multer.Options['fileFilter'] = (
   req,
@@ -13,5 +14,10 @@ export const multerImageFilter: multer.Options['fileFilter'] = (
   }
 
   // only .png .jpg .jpeg format images are allowed
-  cb(new Error('only .png .jpg .jpeg format images are allowed'));
+  cb(
+    new HttpException(
+      HttpStatus.BAD_REQUEST,
+      'only .png .jpg .jpeg format images are allowed',
+    ),
+  );
 };
