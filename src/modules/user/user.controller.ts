@@ -1,32 +1,27 @@
 import { Request, Response } from 'express';
-import { Router } from 'express';
-import {
-  IController,
-  ControllerRoutes,
-  ControllerRoute,
-} from '@/typings/controller.typing';
+import { IController, ControllerRoutes } from '@/typings/controller.typing';
 import { UserService } from './user.service';
 import { bodyValidationPipe } from '@/common/http/pipes';
-import { userSchema, userLoginSchema } from '@/common/joi-schemas';
+import { userSchema } from '@/common/joi-schemas';
 import { UserLogin, UserCreate } from './user.type';
 import { Controller } from '../controller';
 import { authGuard } from '@/common/http/guards/auth.guard';
 import { multerMiddleware } from '@/common/http/middlewares/multer.middleware';
-import { multerImageFilter, multerSoundFilter } from '@/helpers/multer.helper';
-import { kilobytesTobytes, megabytesToBytes } from '@/helpers/shared.helper';
+import { multerImageFilter } from '@/helpers/multer.helper';
+import { kilobytesTobytes } from '@/helpers/shared.helper';
 
 export class UserController extends Controller implements IController {
-  public router: Router = Router();
   public route: string = '/users';
-  private usersService!: UserService;
 
-  constructor() {
+  constructor(private readonly userService = new UserService()) {
     super();
-
-    this.usersService = new UserService();
-    this.initRoutes();
+    // initialize routes
+    super.initRoutes(this.routes());
   }
 
+  /**
+   * important: use .bind(this) in all methods that you use
+   */
   private async routes(): Promise<ControllerRoutes> {
     return {
       get: [
@@ -46,9 +41,8 @@ export class UserController extends Controller implements IController {
       post: [
         // user login
         {
-          path: '/',
-          middlewares: [await bodyValidationPipe(userSchema)],
-          handler: this.getOne.bind(this),
+          path: '/login',
+          handler: this.login.bind(this),
         },
         // user logout
         {
@@ -69,76 +63,13 @@ export class UserController extends Controller implements IController {
           handler: this.uploadAvatar.bind(this),
         },
       ],
-      put: [],
-      delete: [],
     };
-  }
-
-  /**
-   * important: use .bind(this) in all methods that you use
-   */
-  public async initRoutes() {
-    const routes = await this.routes();
-
-    Object.keys(routes).forEach(method => {
-      routes[method].forEach(route => {
-        switch (method) {
-          case 'get':
-            this.router.get(route.path, ...route.middlewares, route.handler);
-            break;
-
-          case 'post':
-            this.router.post(route.path, ...route.middlewares, route.handler);
-            break;
-
-          case 'put':
-            this.router.get(route.path, ...route.middlewares, route.handler);
-            break;
-
-          case 'delete':
-            break;
-        }
-      });
-    });
-    /** ----- GET ----- */
-    // get all users
-    // this.router
-    //   .get('/', authGuard, this.getAll.bind(this))
-    //   // get one user
-    //   .get('/:id', authGuard, this.getOne.bind(this))
-    //   // create new user
-    //   .post(
-    //     '/',
-    //     authGuard,
-    //     // validate data received before create user
-    //     await bodyValidationPipe(userSchema),
-    //     this.createUser.bind(this),
-    //   )
-    //   /** ----- POST ----- */
-    //   // upload user avatar
-    //   .post(
-    //     '/upload-avatar',
-    //     multerMiddleware('avatars', {
-    //       fileFilter: multerImageFilter,
-    //       limits: { fileSize: kilobytesTobytes(350) },
-    //     }).single('avatar'),
-    //     this.uploadAvatar.bind(this),
-    //   )
-    //   // user login
-    //   .post(
-    //     '/login',
-    //     // validate data received
-    //     await bodyValidationPipe(userLoginSchema),
-    //     this.login.bind(this),
-    //   )
-    //   // user logout
-    //   .post('/logout', authGuard, this.logout.bind(this));
   }
 
   /** create a new user */
   private async createUser({ body }: Request, res: Response) {
     try {
-      const result = await this.usersService.save(body as UserCreate);
+      const result = await this.userService.save(body as UserCreate);
 
       return this.sendResponse(result, res);
     } catch (error) {
@@ -149,7 +80,7 @@ export class UserController extends Controller implements IController {
   /** [GET] get all users */
   private async getAll(req: Request, res: Response) {
     try {
-      const result = await this.usersService.getAll();
+      const result = await this.userService.getAll();
 
       return this.sendResponse(result, res);
     } catch (error) {
@@ -160,7 +91,7 @@ export class UserController extends Controller implements IController {
   /** [GET] get all users */
   private async getOne(req: Request, res: Response) {
     try {
-      const result = await this.usersService.getOne(req.params.id);
+      const result = await this.userService.getOne(req.params.id);
 
       return this.sendResponse(result, res);
     } catch (error) {
@@ -177,7 +108,7 @@ export class UserController extends Controller implements IController {
   /** [POST] user login */
   private async login({ body }: Request, res: Response) {
     try {
-      const result = await this.usersService.login(body as UserLogin);
+      const result = await this.userService.login(body as UserLogin);
 
       return this.sendResponse(result, res);
     } catch (error) {
@@ -188,7 +119,7 @@ export class UserController extends Controller implements IController {
   /** [POST] user logout */
   private async logout({ user }: Request, res: Response) {
     try {
-      const result = await this.usersService.logout(user.id);
+      const result = await this.userService.logout(user.id);
 
       this.sendResponse(result, res);
     } catch (error) {

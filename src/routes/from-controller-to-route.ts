@@ -1,5 +1,5 @@
 import controllers from './register-controllers';
-import { ControllerRouteProps } from '@/typings/shared.typing';
+import { ControllerRouteProps } from '@/typings/controller.typing';
 
 /** extract only route props */
 function fromControllerToRoute(controllers: any): ControllerRouteProps[] {

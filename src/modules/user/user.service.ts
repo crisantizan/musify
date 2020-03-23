@@ -77,11 +77,7 @@ export class UserService extends Service {
   public async login({ email, password }: UserLogin) {
     const user = await UserModel.findOne({ email });
 
-    if (!user) {
-      throw this.response(HttpStatus.NOT_FOUND, 'user not found');
-    }
-
-    if (!EncryptService.compareHash(password, user.password)) {
+    if (!user || !EncryptService.compareHash(password, user.password)) {
       throw this.response(HttpStatus.FORBIDDEN, 'incorrect credentials');
     }
 

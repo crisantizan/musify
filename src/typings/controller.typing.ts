@@ -8,16 +8,20 @@ export interface IController {
   /** route name that handle the controller */
   route: string;
   /** method to inicializate routes */
-  initRoutes(): void;
+  // initRoutes(): void;
 }
 
 /** data to define controller routes */
-export interface ControllerRoutes extends Index<ControllerRoute[]> {
+export interface ControllerRoutes extends Index<ControllerRoute[] | undefined> {
   get: ControllerRoute[];
-  post: ControllerRoute[];
-  put: ControllerRoute[];
-  delete: ControllerRoute[];
-  // define the others verbs if you prefer
+  post?: ControllerRoute[];
+  put?: ControllerRoute[];
+  delete?: ControllerRoute[];
+  patch?: ControllerRoute[];
+  options?: ControllerRoute[];
+  head?: ControllerRoute[];
+  connect?: ControllerRoute[];
+  trace?: ControllerRoute[];
 }
 
 /** data to define a one route in the controller routes property */
@@ -25,7 +29,13 @@ export interface ControllerRoute {
   /** path for this endponint */
   path: string;
   /** middlewares to apply */
-  middlewares: RequestHandler[];
+  middlewares?: RequestHandler[];
   /** method that handle this request */
   handler: RequestHandler;
+}
+
+/** express router props in controllers */
+export interface ControllerRouteProps {
+  route: string;
+  router: Router;
 }
