@@ -14,4 +14,9 @@ export class Controller {
     // internal server error
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(error);
   }
+
+  /** send response to client */
+  protected sendResponse<T>(data: ServiceResponse<T>, res: Response) {
+    return res.status(data.code).json(data.response);
+  }
 }

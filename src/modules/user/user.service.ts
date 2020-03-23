@@ -8,6 +8,7 @@ import { Service } from '@/services/service';
 import { JwtService } from '@/services/jwt.service';
 import { RedisService } from '@/services/redis.service';
 import { Role } from '@/common/enums';
+import { JwtPayloadData } from '@/typings/jwt.typing';
 
 export class UserService extends Service {
   private readonly jwtService!: JwtService;
@@ -96,5 +97,15 @@ export class UserService extends Service {
     await this.redisService.set(redisUserKey, token);
 
     return this.response(HttpStatus.OK, { user, token });
+  }
+
+  /** user logout */
+  public async logout(userId: string) {
+    const { redisUserKey } = this.redisService.generateUserkey(userId);
+
+    // remove from the redis
+    await this.redisService.del(redisUserKey);
+
+    return this.response(HttpStatus.OK, 'logout sucessfully');
   }
 }

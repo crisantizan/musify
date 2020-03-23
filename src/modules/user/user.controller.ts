@@ -58,16 +58,17 @@ export class UserController extends Controller implements IController {
         // validate data received
         (req, res, next) => bodyValidationPipe(req, res, next, userLoginSchema),
         this.login.bind(this),
-      );
+      )
+      // user logout
+      .post('/logout', authGuard, this.logout.bind(this));
   }
 
   /** create a new user */
   private async createUser({ body }: Request, res: Response) {
     try {
-      const { code, response } = await this.usersService.save(
-        body as UserCreate,
-      );
-      res.status(code).json(response);
+      const result = await this.usersService.save(body as UserCreate);
+
+      return this.sendResponse(result, res);
     } catch (error) {
       this.handleError(error, res);
     }
@@ -76,8 +77,9 @@ export class UserController extends Controller implements IController {
   /** [GET] get all users */
   private async getAll(req: Request, res: Response) {
     try {
-      const { code, response } = await this.usersService.getAll();
-      return res.status(code).json(response);
+      const result = await this.usersService.getAll();
+
+      return this.sendResponse(result, res);
     } catch (error) {
       this.handleError(error, res);
     }
@@ -86,8 +88,9 @@ export class UserController extends Controller implements IController {
   /** [GET] get all users */
   private async getOne(req: Request, res: Response) {
     try {
-      const { code, response } = await this.usersService.getOne(req.params.id);
-      return res.status(code).json(response);
+      const result = await this.usersService.getOne(req.params.id);
+
+      return this.sendResponse(result, res);
     } catch (error) {
       this.handleError(error, res);
     }
@@ -99,14 +102,23 @@ export class UserController extends Controller implements IController {
     res.json('works!');
   }
 
-  /** [POST] login */
+  /** [POST] user login */
   private async login({ body }: Request, res: Response) {
     try {
-      const { code, response } = await this.usersService.login(
-        body as UserLogin,
-      );
+      const result = await this.usersService.login(body as UserLogin);
 
-      return res.status(code).json(response);
+      return this.sendResponse(result, res);
+    } catch (error) {
+      this.handleError(error, res);
+    }
+  }
+
+  /** [POST] user logout */
+  private async logout({ user }: Request, res: Response) {
+    try {
+      const result = await this.usersService.logout(user.id);
+
+      this.sendResponse(result, res);
     } catch (error) {
       this.handleError(error, res);
     }
