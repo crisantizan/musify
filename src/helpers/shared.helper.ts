@@ -39,3 +39,11 @@ export function generateToken(length: number = 4, addDate = false): string {
 
   return randomString;
 }
+
+/** from kilobytes to bytes */
+export const kilobytesTobytes = (kilobytes: number) => kilobytes * 1024;
+
+/** from megabytes to kilobytes */
+export function megabytesToBytes(megabytes: number) {
+  return megabytes * kilobytesTobytes(1024);
+}

@@ -9,6 +9,7 @@ import { Controller } from '../controller';
 import { authGuard } from '@/common/http/guards/auth.guard';
 import { multerMiddleware } from '@/common/http/middlewares/multer.middleware';
 import { multerImageFilter } from '@/helpers/multer.helper';
+import { kilobytesTobytes } from '@/helpers/shared.helper';
 
 export class UserController extends Controller implements IController {
   public router: Router = Router();
@@ -47,7 +48,7 @@ export class UserController extends Controller implements IController {
         '/upload-avatar/:userId',
         multerMiddleware('avatars', {
           fileFilter: multerImageFilter,
-          limits: { fileSize: 1024 * 350 },
+          limits: { fileSize: kilobytesTobytes(350) },
         }).single('avatar'),
         this.uploadAvatar.bind(this),
       )
