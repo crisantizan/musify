@@ -8,8 +8,8 @@ import { UserLogin } from './user.type';
 import { Controller } from '../controller';
 import { authGuard } from '@/common/http/guards/auth.guard';
 import { multerMiddleware } from '@/common/http/middlewares/multer.middleware';
-import { multerImageFilter } from '@/helpers/multer.helper';
-import { kilobytesTobytes } from '@/helpers/shared.helper';
+import { multerImageFilter, multerSoundFilter } from '@/helpers/multer.helper';
+import { kilobytesTobytes, megabytesToBytes } from '@/helpers/shared.helper';
 
 export class UserController extends Controller implements IController {
   public router: Router = Router();
@@ -51,6 +51,15 @@ export class UserController extends Controller implements IController {
           limits: { fileSize: kilobytesTobytes(350) },
         }).single('avatar'),
         this.uploadAvatar.bind(this),
+      )
+      // upload music
+      .post(
+        '/upload-song',
+        multerMiddleware('songs', {
+          fileFilter: multerSoundFilter,
+          limits: { fileSize: megabytesToBytes(1) },
+        }).single('song'),
+        this.uploadSong.bind(this)
       )
       // user login
       .post(
@@ -95,6 +104,11 @@ export class UserController extends Controller implements IController {
   private async uploadAvatar(req: Request, res: Response) {
     // console.log({ file: req.file, userId: req.params });
     res.json('works!');
+  }
+
+  /** [POST] upload song */
+  private async uploadSong(req: Request, res: Response) {
+    res.json('canción subida');
   }
 
   /** [POST] login */

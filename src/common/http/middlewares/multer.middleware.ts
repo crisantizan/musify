@@ -2,7 +2,7 @@ import multer from 'multer';
 import { join, extname } from 'path';
 import { generateToken } from '@/helpers/shared.helper';
 
-type FolderType = 'avatars' | 'covers' | 'sounds';
+type FolderType = 'avatars' | 'covers' | 'songs';
 
 interface Options {
   fileFilter?: multer.Options['fileFilter'];
