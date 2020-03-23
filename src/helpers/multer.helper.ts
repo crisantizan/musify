@@ -13,7 +13,6 @@ export const multerImageFilter: multer.Options['fileFilter'] = (
     return cb(null, true);
   }
 
-  // only .png .jpg .jpeg format images are allowed
   cb(
     new HttpException(
       HttpStatus.BAD_REQUEST,

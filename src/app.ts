@@ -1,4 +1,4 @@
-import express, { NextFunction, ErrorRequestHandler } from 'express';
+import express, { ErrorRequestHandler } from 'express';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import cors from 'cors';
@@ -42,6 +42,11 @@ app.use('/api', router);
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   if (err instanceof HttpException) {
     res.status(err.status).json(err.body);
+  }
+
+  // multer errors
+  if (err.code === 'LIMIT_FILE_SIZE') {
+    return res.status(400).json('file is too big');
   }
 };
 app.use(errorHandler);

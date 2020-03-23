@@ -45,7 +45,10 @@ export class UserController extends Controller implements IController {
       // upload user avatar
       .post(
         '/upload-avatar/:userId',
-        multerMiddleware('avatars', multerImageFilter).single('avatar'),
+        multerMiddleware('avatars', {
+          fileFilter: multerImageFilter,
+          limits: { fileSize: 1024 * 350 },
+        }).single('avatar'),
         this.uploadAvatar.bind(this),
       )
       // user login

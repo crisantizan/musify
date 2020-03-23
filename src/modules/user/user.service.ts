@@ -7,7 +7,6 @@ import { ServiceResponse } from '@/typings/shared.typing';
 import { Service } from '@/services/service';
 import { JwtService } from '@/services/jwt.service';
 import { RedisService } from '@/services/redis.service';
-import { Role } from '@/common/enums';
 
 export class UserService extends Service {
   private readonly jwtService!: JwtService;
