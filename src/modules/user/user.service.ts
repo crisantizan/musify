@@ -60,7 +60,6 @@ export class UserService extends Service {
       );
     }
 
-    data.password = await EncryptService.createHash(data.password);
     // set image property as null
     const model = new UserModel({ ...data, image: null });
     const user = await model.save();
