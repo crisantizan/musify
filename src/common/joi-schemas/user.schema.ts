@@ -11,6 +11,8 @@ export const userSchema = joi.object<UserCreate>({
     .string()
     .required()
     .email(),
-  role: joi.string().required().equal(Role.ADMIN, Role.USER),
-  image: joi.string().empty(),
+  role: joi
+    .string()
+    .required()
+    .equal(Role.ADMIN, Role.USER),
 });

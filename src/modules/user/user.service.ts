@@ -7,6 +7,7 @@ import { ServiceResponse } from '@/typings/shared.typing';
 import { Service } from '@/services/service';
 import { JwtService } from '@/services/jwt.service';
 import { RedisService } from '@/services/redis.service';
+import { Role } from '@/common/enums';
 
 export class UserService extends Service {
   private readonly jwtService!: JwtService;
@@ -37,6 +38,21 @@ export class UserService extends Service {
 
   /** save a new user */
   public async save(data: UserCreate) {
+    // verify si the new user is a admin
+    if (data.role === 'ADMIN') {
+      // count admin
+      const quantity = await UserModel.count({ role: Role.ADMIN });
+
+      if (quantity > 0) {
+        throw this.response(
+          HttpStatus.BAD_REQUEST,
+          'the administrator type user already exists, there should only be one',
+        );
+      }
+
+      // allow create admin
+    }
+
     if (await this.emailExists(data.email)) {
       throw this.response(
         HttpStatus.BAD_REQUEST,
@@ -45,7 +61,8 @@ export class UserService extends Service {
     }
 
     data.password = await EncryptService.createHash(data.password);
-    const model = new UserModel(data);
+    // set image property as null
+    const model = new UserModel({ ...data, image: null });
     const user = await model.save();
 
     return this.response(HttpStatus.CREATED, user);

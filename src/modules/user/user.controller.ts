@@ -4,7 +4,7 @@ import { IController } from '@/typings/controller.typing';
 import { UserService } from './user.service';
 import { bodyValidationPipe } from '@/common/http/pipes';
 import { userSchema, userLoginSchema } from '@/common/joi-schemas';
-import { UserLogin } from './user.type';
+import { UserLogin, UserCreate } from './user.type';
 import { Controller } from '../controller';
 import { authGuard } from '@/common/http/guards/auth.guard';
 import { multerMiddleware } from '@/common/http/middlewares/multer.middleware';
@@ -45,21 +45,12 @@ export class UserController extends Controller implements IController {
       /** ----- POST ----- */
       // upload user avatar
       .post(
-        '/upload-avatar/:userId',
+        '/upload-avatar',
         multerMiddleware('avatars', {
           fileFilter: multerImageFilter,
           limits: { fileSize: kilobytesTobytes(350) },
         }).single('avatar'),
         this.uploadAvatar.bind(this),
-      )
-      // upload music
-      .post(
-        '/upload-song',
-        multerMiddleware('songs', {
-          fileFilter: multerSoundFilter,
-          limits: { fileSize: megabytesToBytes(1) },
-        }).single('song'),
-        this.uploadSong.bind(this)
       )
       // user login
       .post(
@@ -73,7 +64,9 @@ export class UserController extends Controller implements IController {
   /** create a new user */
   private async createUser({ body }: Request, res: Response) {
     try {
-      const { code, response } = await this.usersService.save(body);
+      const { code, response } = await this.usersService.save(
+        body as UserCreate,
+      );
       res.status(code).json(response);
     } catch (error) {
       this.handleError(error, res);
@@ -104,11 +97,6 @@ export class UserController extends Controller implements IController {
   private async uploadAvatar(req: Request, res: Response) {
     // console.log({ file: req.file, userId: req.params });
     res.json('works!');
-  }
-
-  /** [POST] upload song */
-  private async uploadSong(req: Request, res: Response) {
-    res.json('canción subida');
   }
 
   /** [POST] login */

@@ -7,11 +7,12 @@ export interface UserCreate {
   password: string;
   email: string;
   role: RoleType;
-  image?: string;
 }
 
 /** complete data of user */
-export interface User extends UserCreate, TimestampsFields {}
+export interface User extends UserCreate, TimestampsFields {
+  image: string | null;
+}
 
 /** user login data */
 export interface UserLogin {
