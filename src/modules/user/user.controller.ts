@@ -1,6 +1,10 @@
 import { Request, Response } from 'express';
 import { Router } from 'express';
-import { IController } from '@/typings/controller.typing';
+import {
+  IController,
+  ControllerRoutes,
+  ControllerRoute,
+} from '@/typings/controller.typing';
 import { UserService } from './user.service';
 import { bodyValidationPipe } from '@/common/http/pipes';
 import { userSchema, userLoginSchema } from '@/common/joi-schemas';
@@ -23,44 +27,112 @@ export class UserController extends Controller implements IController {
     this.initRoutes();
   }
 
+  private async routes(): Promise<ControllerRoutes> {
+    return {
+      get: [
+        // get all users
+        {
+          path: '/',
+          middlewares: [authGuard],
+          handler: this.getAll.bind(this),
+        },
+        // get user
+        {
+          path: '/:id',
+          middlewares: [authGuard],
+          handler: this.getOne.bind(this),
+        },
+      ],
+      post: [
+        // user login
+        {
+          path: '/',
+          middlewares: [await bodyValidationPipe(userSchema)],
+          handler: this.getOne.bind(this),
+        },
+        // user logout
+        {
+          path: '/logout',
+          middlewares: [authGuard],
+          handler: this.logout.bind(this),
+        },
+        // upload user image
+        {
+          path: '/upload-avatar',
+          middlewares: [
+            authGuard,
+            multerMiddleware('avatars', {
+              fileFilter: multerImageFilter,
+              limits: { fileSize: kilobytesTobytes(350) },
+            }).single('avatar'),
+          ],
+          handler: this.uploadAvatar.bind(this),
+        },
+      ],
+      put: [],
+      delete: [],
+    };
+  }
+
   /**
    * important: use .bind(this) in all methods that you use
    */
-  public initRoutes() {
+  public async initRoutes() {
+    const routes = await this.routes();
+
+    Object.keys(routes).forEach(method => {
+      routes[method].forEach(route => {
+        switch (method) {
+          case 'get':
+            this.router.get(route.path, ...route.middlewares, route.handler);
+            break;
+
+          case 'post':
+            this.router.post(route.path, ...route.middlewares, route.handler);
+            break;
+
+          case 'put':
+            this.router.get(route.path, ...route.middlewares, route.handler);
+            break;
+
+          case 'delete':
+            break;
+        }
+      });
+    });
     /** ----- GET ----- */
     // get all users
-    this.router
-      .get('/', authGuard, this.getAll.bind(this))
-      // get one user
-      .get('/:id', authGuard, this.getOne.bind(this))
-      // create new user
-      .post(
-        '/',
-        authGuard,
-        // validate data received before create user
-        (req, res, next) => bodyValidationPipe(req, res, next, userSchema),
-        this.createUser.bind(this),
-      )
-
-      /** ----- POST ----- */
-      // upload user avatar
-      .post(
-        '/upload-avatar',
-        multerMiddleware('avatars', {
-          fileFilter: multerImageFilter,
-          limits: { fileSize: kilobytesTobytes(350) },
-        }).single('avatar'),
-        this.uploadAvatar.bind(this),
-      )
-      // user login
-      .post(
-        '/login',
-        // validate data received
-        (req, res, next) => bodyValidationPipe(req, res, next, userLoginSchema),
-        this.login.bind(this),
-      )
-      // user logout
-      .post('/logout', authGuard, this.logout.bind(this));
+    // this.router
+    //   .get('/', authGuard, this.getAll.bind(this))
+    //   // get one user
+    //   .get('/:id', authGuard, this.getOne.bind(this))
+    //   // create new user
+    //   .post(
+    //     '/',
+    //     authGuard,
+    //     // validate data received before create user
+    //     await bodyValidationPipe(userSchema),
+    //     this.createUser.bind(this),
+    //   )
+    //   /** ----- POST ----- */
+    //   // upload user avatar
+    //   .post(
+    //     '/upload-avatar',
+    //     multerMiddleware('avatars', {
+    //       fileFilter: multerImageFilter,
+    //       limits: { fileSize: kilobytesTobytes(350) },
+    //     }).single('avatar'),
+    //     this.uploadAvatar.bind(this),
+    //   )
+    //   // user login
+    //   .post(
+    //     '/login',
+    //     // validate data received
+    //     await bodyValidationPipe(userLoginSchema),
+    //     this.login.bind(this),
+    //   )
+    //   // user logout
+    //   .post('/logout', authGuard, this.logout.bind(this));
   }
 
   /** create a new user */

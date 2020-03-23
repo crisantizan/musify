@@ -1,6 +1,11 @@
 import { Router } from 'express';
 import { HttpStatus } from '@/common/enums/http-status.enum';
 
+/** add index signature */
+export interface Index<T> {
+  [key: string]: T;
+}
+
 /** environment mode */
 export type EnvMode = 'development' | 'production';
 
