@@ -1,4 +1,5 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
+import { unlink as removeFile } from 'fs-extra';
 import { IController, ControllerRoutes } from '@/typings/controller.typing';
 import { UserService } from './user.service';
 import { UserLogin, UserCreate } from './user.type';
@@ -9,6 +10,7 @@ import { multerImageFilter } from '@/helpers/multer.helper';
 import { kilobytesTobytes } from '@/helpers/shared.helper';
 import { roleGuard } from '@/common/http/guards/role.guard';
 import { Role } from '@/common/enums';
+import { uploadUserImageMiddleware } from '@/common/http/middlewares/upload-user-image.middleware';
 
 export class UserController extends Controller implements IController {
   public route: string = '/users';
@@ -59,14 +61,16 @@ export class UserController extends Controller implements IController {
         // upload user image
         {
           path: '/upload-avatar',
-          middlewares: [
-            authGuard,
-            multerMiddleware('avatars', {
-              fileFilter: multerImageFilter,
-              limits: { fileSize: kilobytesTobytes(350) },
-            }).single('avatar'),
-          ],
+          middlewares: [authGuard, uploadUserImageMiddleware],
           handler: this.uploadAvatar.bind(this),
+        },
+      ],
+      put: [
+        // update user data
+        {
+          path: '/',
+          middlewares: [authGuard, uploadUserImageMiddleware],
+          handler: this.update.bind(this),
         },
       ],
     };
@@ -129,6 +133,23 @@ export class UserController extends Controller implements IController {
 
       this.sendResponse(result, res);
     } catch (error) {
+      this.handleError(error, res);
+    }
+  }
+
+  /** [PUT] update user data */
+  private async update(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await this.userService.update(
+        req.user.id,
+        req.body,
+        req.file,
+      );
+
+      this.sendResponse(result, res);
+    } catch (error) {
+      // remove image upladed
+      await removeFile(req.file.path);
       this.handleError(error, res);
     }
   }

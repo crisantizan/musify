@@ -11,14 +11,11 @@ import { Role } from '@/common/enums';
 import { JwtPayloadData } from '@/typings/jwt.typing';
 
 export class UserService extends Service {
-  private readonly jwtService!: JwtService;
-  private readonly redisService!: RedisService;
-
-  constructor() {
+  constructor(
+    private readonly jwtService = new JwtService(),
+    private readonly redisService = new RedisService(),
+  ) {
     super();
-
-    this.jwtService = new JwtService();
-    this.redisService = new RedisService();
   }
   /** get all users */
   public async getAll(): Promise<ServiceResponse<UserDocument[]>> {
@@ -103,5 +100,20 @@ export class UserService extends Service {
     await this.redisService.del(redisUserKey);
 
     return this.response(HttpStatus.OK, 'logout sucessfully');
+  }
+
+  /** user update */
+  public async update(
+    userId: string,
+    data: Partial<UserCreate>,
+    file?: Express.Multer.File,
+  ) {
+    // add new image
+    if (!!file) {
+      data.image = file.fieldname;
+    }
+    const newData = await UserModel.findByIdAndUpdate(userId, data);
+
+    return this.response(HttpStatus.OK, newData);
   }
 }
