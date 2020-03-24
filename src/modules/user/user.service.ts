@@ -8,7 +8,7 @@ import { Service } from '@/services/service';
 import { JwtService } from '@/services/jwt.service';
 import { RedisService } from '@/services/redis.service';
 import { Role } from '@/common/enums';
-import { JwtPayloadData } from '@/typings/jwt.typing';
+import { removeImage } from '@/helpers/multer.helper';
 
 export class UserService extends Service {
   constructor(
@@ -108,12 +108,41 @@ export class UserService extends Service {
     data: Partial<UserCreate>,
     file?: Express.Multer.File,
   ) {
+    if (!Object.keys(data).length) {
+      throw this.response(
+        HttpStatus.BAD_REQUEST,
+        'at least one field must be sent',
+      );
+    }
+
+    const user = await UserModel.findById(userId);
+
+    if (!user) {
+      throw this.response(
+        HttpStatus.BAD_REQUEST,
+        'user not found, please login again',
+      );
+    }
+
     // add new image
     if (!!file) {
-      data.image = file.fieldname;
-    }
-    const newData = await UserModel.findByIdAndUpdate(userId, data);
+      // delete preview image of disk
+      if (!!user.image) {
+        await removeImage(user.image, 'avatars');
+      }
 
-    return this.response(HttpStatus.OK, newData);
+      // assign new image
+      data.image = file.filename;
+    }
+
+    // update
+    const result = await user.update(data);
+
+    return this.response(
+      HttpStatus.OK,
+      !!result.nModified
+        ? 'user updated successfully'
+        : 'the same data has been sent',
+    );
   }
 }

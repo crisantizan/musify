@@ -1,4 +1,6 @@
 import multer from 'multer';
+import { unlink } from 'fs-extra';
+import { join } from 'path';
 import { HttpException } from '@/common/http/exceptions/http.exception';
 import { HttpStatus } from '@/common/enums';
 
@@ -40,3 +42,9 @@ export const multerSoundFilter: multer.Options['fileFilter'] = (
     ),
   );
 };
+
+export async function removeImage(filename: string, folder: string) {
+  const fullpath = join(__dirname, '..', 'assets', 'uploads', folder, filename);
+  console.log(fullpath);
+  await unlink(fullpath);
+}

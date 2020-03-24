@@ -5,12 +5,11 @@ import { UserService } from './user.service';
 import { UserLogin, UserCreate } from './user.type';
 import { Controller } from '../controller';
 import { authGuard } from '@/common/http/guards/auth.guard';
-import { multerMiddleware } from '@/common/http/middlewares/multer.middleware';
-import { multerImageFilter } from '@/helpers/multer.helper';
-import { kilobytesTobytes } from '@/helpers/shared.helper';
 import { roleGuard } from '@/common/http/guards/role.guard';
 import { Role } from '@/common/enums';
 import { uploadUserImageMiddleware } from '@/common/http/middlewares/upload-user-image.middleware';
+import { bodyValidationPipe } from '@/common/http/pipes';
+import { userUpdateSchema } from '@/common/joi-schemas/user-update.schema';
 
 export class UserController extends Controller implements IController {
   public route: string = '/users';
@@ -69,7 +68,11 @@ export class UserController extends Controller implements IController {
         // update user data
         {
           path: '/',
-          middlewares: [authGuard, uploadUserImageMiddleware],
+          middlewares: [
+            authGuard,
+            uploadUserImageMiddleware,
+            await bodyValidationPipe(userUpdateSchema),
+          ],
           handler: this.update.bind(this),
         },
       ],
@@ -148,8 +151,11 @@ export class UserController extends Controller implements IController {
 
       this.sendResponse(result, res);
     } catch (error) {
-      // remove image upladed
-      await removeFile(req.file.path);
+      if (!!req.file) {
+        // remove image upladed
+        await removeFile(req.file.path);
+      }
+
       this.handleError(error, res);
     }
   }
