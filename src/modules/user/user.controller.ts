@@ -1,8 +1,6 @@
 import { Request, Response } from 'express';
 import { IController, ControllerRoutes } from '@/typings/controller.typing';
 import { UserService } from './user.service';
-import { bodyValidationPipe } from '@/common/http/pipes';
-import { userSchema } from '@/common/joi-schemas';
 import { UserLogin, UserCreate } from './user.type';
 import { Controller } from '../controller';
 import { authGuard } from '@/common/http/guards/auth.guard';
