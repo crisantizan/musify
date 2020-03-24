@@ -1,4 +1,3 @@
-import db from 'mongoose';
 import UserModel, { UserDocument } from '@/models/user.model';
 import { UserCreate, UserLogin } from './user.type';
 import { EncryptService } from '@/services/encrypt.service';
@@ -10,6 +9,7 @@ import { JwtService } from '@/services/jwt.service';
 import { RedisService } from '@/services/redis.service';
 import { Role } from '@/common/enums';
 import { removeImage } from '@/helpers/multer.helper';
+import { getMongooseSession } from '@/db/session';
 
 export class UserService extends Service {
   constructor(
@@ -109,7 +109,8 @@ export class UserService extends Service {
     data: Partial<UserCreate>,
     file?: Express.Multer.File,
   ) {
-    const session = await db.startSession();
+    const session = await getMongooseSession();
+
     session.startTransaction();
     try {
       const user = await UserModel.findById(userId);
