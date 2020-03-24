@@ -43,7 +43,7 @@ export class UserController extends Controller implements IController {
         // create user
         {
           path: '/',
-          middlewares: [authGuard, roleGuard(Role.ADMIN)],
+          middlewares: [/* authGuard, roleGuard(Role.ADMIN) */],
           handler: this.createUser.bind(this),
         },
         // user login

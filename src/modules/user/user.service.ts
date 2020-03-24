@@ -1,3 +1,4 @@
+import db from 'mongoose';
 import UserModel, { UserDocument } from '@/models/user.model';
 import { UserCreate, UserLogin } from './user.type';
 import { EncryptService } from '@/services/encrypt.service';
@@ -108,6 +109,28 @@ export class UserService extends Service {
     data: Partial<UserCreate>,
     file?: Express.Multer.File,
   ) {
+    const session = await db.startSession();
+    session.startTransaction();
+    try {
+      const user = await UserModel.findById(userId);
+
+      await user?.update({ name: 'NEW NAME EDIT' }).session(session);
+
+      if (!!user?.name) {
+        throw 'ggg debe abortar';
+      }
+
+      await user?.update({ surname: 'NEW SURNAME' }).session(session);
+      await session.commitTransaction();
+
+      return this.response(200, 'holi');
+    } catch (error) {
+      await session.abortTransaction();
+      return this.response(405, error);
+    } finally {
+      session.endSession();
+    }
+
     if (!Object.keys(data).length) {
       throw this.response(
         HttpStatus.BAD_REQUEST,
@@ -125,24 +148,24 @@ export class UserService extends Service {
     }
 
     // add new image
-    if (!!file) {
-      // delete preview image of disk
-      if (!!user.image) {
-        await removeImage(user.image, 'avatars');
-      }
+    // if (!!file) {
+    //   // delete old image of disk
+    //   if (!!user.image) {
+    //     await removeImage(user.image, 'avatars');
+    //   }
 
-      // assign new image
-      data.image = file.filename;
-    }
+    //   // assign new image
+    //   data.image = file.filename;
+    // }
 
-    // update
-    const result = await user.update(data);
+    // // update
+    // const result = await user.update(data);
 
-    return this.response(
-      HttpStatus.OK,
-      !!result.nModified
-        ? 'user updated successfully'
-        : 'the same data has been sent',
-    );
+    // return this.response(
+    //   HttpStatus.OK,
+    //   !!result.nModified
+    //     ? 'user updated successfully'
+    //     : 'the same data has been sent',
+    // );
   }
 }
