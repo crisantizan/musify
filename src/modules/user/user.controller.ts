@@ -7,6 +7,8 @@ import { authGuard } from '@/common/http/guards/auth.guard';
 import { multerMiddleware } from '@/common/http/middlewares/multer.middleware';
 import { multerImageFilter } from '@/helpers/multer.helper';
 import { kilobytesTobytes } from '@/helpers/shared.helper';
+import { roleGuard } from '@/common/http/guards/role.guard';
+import { Role } from '@/common/enums';
 
 export class UserController extends Controller implements IController {
   public route: string = '/users';
@@ -20,7 +22,7 @@ export class UserController extends Controller implements IController {
   /**
    * important: use .bind(this) in all methods that you use
    */
-  private async routes(): Promise<ControllerRoutes> {
+  public async routes(): Promise<ControllerRoutes> {
     return {
       get: [
         // get all users
@@ -37,6 +39,12 @@ export class UserController extends Controller implements IController {
         },
       ],
       post: [
+        // create user
+        {
+          path: '/',
+          middlewares: [authGuard, roleGuard(Role.ADMIN)],
+          handler: this.createUser.bind(this),
+        },
         // user login
         {
           path: '/login',

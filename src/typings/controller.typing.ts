@@ -1,14 +1,12 @@
-import { Router, RequestParamHandler, RequestHandler } from 'express';
+import { Router, RequestHandler } from 'express';
 import { Index } from './shared.typing';
 
 /** methods and props that all controllers they should have */
 export interface IController {
-  /** express router */
-  router: Router;
   /** route name that handle the controller */
   route: string;
-  /** method to inicializate routes */
-  // initRoutes(): void;
+  /** define routes of controller */
+  routes(): Promise<ControllerRoutes>;
 }
 
 /** data to define controller routes */

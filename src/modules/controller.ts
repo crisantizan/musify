@@ -13,7 +13,6 @@ export class Controller {
     HttpMethod.GET,
     HttpMethod.POST,
     HttpMethod.PUT,
-    HttpMethod.POST,
     HttpMethod.DELETE,
     HttpMethod.PATCH,
     HttpMethod.OPTIONS,
