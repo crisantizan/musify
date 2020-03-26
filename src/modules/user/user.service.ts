@@ -1,4 +1,4 @@
-import UserModel, { UserDocument } from '@/models/user.model';
+import { UserDocument, UserModel } from '@/models';
 import { UserCreate, UserLogin } from './user.type';
 import { EncryptService } from '@/services/encrypt.service';
 import { HttpStatus } from '@/common/enums/http-status.enum';

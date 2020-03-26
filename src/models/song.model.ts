@@ -21,4 +21,4 @@ const SongSchema = new Schema(
   { timestamps: true },
 );
 
-export default model<SongDocument>('Song', SongSchema);
+export const SongModel = model<SongDocument>('Song', SongSchema);

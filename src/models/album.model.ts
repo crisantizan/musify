@@ -21,4 +21,4 @@ const AlbumSchema = new Schema(
   { timestamps: true },
 );
 
-export default model<AlbumDocument>('Album', AlbumSchema);
+export const AlbumModel = model<AlbumDocument>('Album', AlbumSchema);

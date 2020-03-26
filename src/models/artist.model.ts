@@ -15,4 +15,4 @@ const ArtistSchema = new Schema<ArtistCreate>(
 
 ArtistSchema.set('toJSON', { virtuals: true });
 
-export default model<ArtistDocument>('Artist', ArtistSchema);
+export const ArtistModel = model<ArtistDocument>('Artist', ArtistSchema);
