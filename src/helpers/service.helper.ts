@@ -13,3 +13,15 @@ export function serviceResponse<T>(
 export function isEquals(values: any, schema: any) {
   return Object.keys(values).every(key => schema[key] === values[key]);
 }
+
+/** replace object property values with "newValues" */
+export function mergeObject<T>(newValues: any, schema: T) {
+  Object.keys(newValues).forEach(key => {
+    if (!!(schema as any)[key]) {
+      (schema as any)[key] = newValues[key];
+    }
+  });
+
+
+  return schema as T;
+}

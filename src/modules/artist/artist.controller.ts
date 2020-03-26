@@ -7,8 +7,8 @@ import { roleGuard } from '@/common/http/guards/role.guard';
 import { Role } from '@/common/enums';
 import { bodyValidationPipe } from '@/common/http/pipes';
 import { artistSchema } from '@/common/joi-schemas';
-import { multerMiddleware } from '@/common/http/middlewares/multer.middleware';
 import { uploadArtistImageMiddleware } from '@/common/http/middlewares/upload-images.middleware';
+import { artistUpdateSchema } from '@/common/joi-schemas/artist-update.squema';
 
 export class ArtistController extends Controller implements IController {
   public readonly route: string = '/artists';
@@ -40,6 +40,19 @@ export class ArtistController extends Controller implements IController {
           handler: this.create.bind(this),
         },
       ],
+      put: [
+        // update artist data
+        {
+          path: '/:artistId',
+          middlewares: [
+            authGuard,
+            roleGuard(Role.ADMIN),
+            uploadArtistImageMiddleware,
+            await bodyValidationPipe(artistUpdateSchema),
+          ],
+          handler: this.update.bind(this),
+        },
+      ],
     };
   }
 
@@ -58,6 +71,21 @@ export class ArtistController extends Controller implements IController {
   private async create(req: Request, res: Response) {
     try {
       const result = await this.artistService.create(req.body, req.file);
+      return this.sendResponse(result, res);
+    } catch (error) {
+      this.handleError(error, res);
+    }
+  }
+
+  /** [PUT] update artist data */
+  private async update(req: Request, res: Response) {
+    try {
+      const result = await this.artistService.update(
+        req.params.artistId,
+        req.body,
+        req.file,
+      );
+
       return this.sendResponse(result, res);
     } catch (error) {
       this.handleError(error, res);

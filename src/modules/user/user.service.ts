@@ -125,17 +125,16 @@ export class UserService extends Service {
     data: Partial<UserCreate>,
     file?: Express.Multer.File,
   ) {
-    if (!Object.keys(data).length) {
-      throw this.response(
-        HttpStatus.BAD_REQUEST,
-        'at least one field must be sent',
-      );
-    }
-
     const session = await getMongooseSession();
 
     session.startTransaction();
     try {
+      if (!Object.keys(data).length) {
+        throw this.response(
+          HttpStatus.BAD_REQUEST,
+          'at least one field must be sent',
+        );
+      }
       const user = await UserModel.findById(userId);
 
       if (!user) {
@@ -178,7 +177,7 @@ export class UserService extends Service {
         // remove image upladed
         await removeAsset(file.path);
       }
-      return error;
+      throw error;
     } finally {
       session.endSession();
     }
