@@ -17,10 +17,7 @@ export class ArtistService extends Service {
   }
 
   /** get all */
-  public async getAll({ limit, page }: PaginationOptions) {
-    limit = limit || 10;
-    page = page || 1;
-
+  public async getAll({ limit = 10, page = 1 }: PaginationOptions) {
     const artists = await ArtistModel.paginate({}, { page, limit });
 
     return this.response(HttpStatus.OK, artists);

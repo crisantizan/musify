@@ -5,7 +5,7 @@ import { UserLogin, UserCreate } from './user.type';
 import { Controller } from '../controller';
 import { authGuard } from '@/common/http/guards/auth.guard';
 import { uploadUserImageMiddleware } from '@/common/http/middlewares/upload-images.middleware';
-import { bodyValidationPipe } from '@/common/http/pipes';
+import { validationPipe } from '@/common/http/pipes';
 import { userUpdateSchema } from '@/common/joi-schemas/user-update.schema';
 
 export class UserController extends Controller implements IController {
@@ -76,7 +76,7 @@ export class UserController extends Controller implements IController {
           middlewares: [
             authGuard,
             uploadUserImageMiddleware,
-            await bodyValidationPipe(userUpdateSchema),
+            await validationPipe(userUpdateSchema),
           ],
           handler: this.update.bind(this),
         },

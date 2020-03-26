@@ -5,11 +5,12 @@ import { ArtistService } from './artist.service';
 import { authGuard } from '@/common/http/guards/auth.guard';
 import { roleGuard } from '@/common/http/guards/role.guard';
 import { Role } from '@/common/enums';
-import { bodyValidationPipe } from '@/common/http/pipes';
+import { validationPipe } from '@/common/http/pipes';
 import { artistSchema } from '@/common/joi-schemas';
 import { uploadArtistImageMiddleware } from '@/common/http/middlewares/upload-images.middleware';
 import { artistUpdateSchema } from '@/common/joi-schemas/artist-update.squema';
 import { PaginationOptions } from '@/typings/shared.typing';
+import { artistPaginationSchema } from '@/common/joi-schemas/artist-paginate.schema';
 
 export class ArtistController extends Controller implements IController {
   public readonly route: string = '/artists';
@@ -24,7 +25,10 @@ export class ArtistController extends Controller implements IController {
       get: [
         {
           path: '/',
-          middlewares: [authGuard],
+          middlewares: [
+            authGuard,
+            await validationPipe(artistPaginationSchema, 'query'),
+          ],
           handler: this.getAll.bind(this),
         },
       ],
@@ -36,7 +40,7 @@ export class ArtistController extends Controller implements IController {
             authGuard,
             roleGuard(Role.ADMIN),
             uploadArtistImageMiddleware,
-            await bodyValidationPipe(artistSchema),
+            await validationPipe(artistSchema),
           ],
           handler: this.create.bind(this),
         },
@@ -49,7 +53,7 @@ export class ArtistController extends Controller implements IController {
             authGuard,
             roleGuard(Role.ADMIN),
             uploadArtistImageMiddleware,
-            await bodyValidationPipe(artistUpdateSchema),
+            await validationPipe(artistUpdateSchema),
           ],
           handler: this.update.bind(this),
         },
@@ -61,7 +65,6 @@ export class ArtistController extends Controller implements IController {
   private async getAll(req: Request, res: Response) {
     try {
       const pagination: PaginationOptions = req.query;
-      console.log(pagination);
 
       const result = await this.artistService.getAll(pagination);
 
