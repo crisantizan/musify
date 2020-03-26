@@ -1,5 +1,5 @@
 import multer from 'multer';
-import { remove, ensureDir } from 'fs-extra';
+import { remove, mkdirp, pathExists } from 'fs-extra';
 import { join } from 'path';
 import { HttpException } from '@/common/http/exceptions/http.exception';
 import { HttpStatus } from '@/common/enums';
@@ -53,11 +53,12 @@ export async function removeAsset(basePath: string, ...paths: string[]) {
   try {
     let fullPath = !paths.length ? basePath : join(basePath, ...paths);
 
-    await remove(fullPath);
-    return true;
+    // remove only if it exists
+    if (await pathExists(fullPath)) {
+      await remove(fullPath);
+    }
   } catch (error) {
-    console.log(error);
-    return false;
+    throw error;
   }
 }
 
@@ -86,10 +87,8 @@ export function getAssetPath(assetType: AssetsType, folder: FolderAssetType) {
 
 export async function createAssetFolder(path: string, folderName: string) {
   try {
-    await ensureDir(join(path, folderName));
-    return true;
+    await mkdirp(join(path, folderName));
   } catch (error) {
-    console.log(error);
-    return false;
+    throw error;
   }
 }
