@@ -1,19 +1,18 @@
-import mongoose, { model } from 'mongoose';
+import mongoose, { model, Document } from 'mongoose';
+import { Artist, ArtistCreate } from '@/modules/artist/artist.type';
 const { Schema } = mongoose;
 
-export interface ArtistDocument extends mongoose.Document {
-  name: string;
-  description: string;
-  cover: string;
-}
+export interface ArtistDocument extends Artist, Document {}
 
-const ArtistSchema = new Schema(
+const ArtistSchema = new Schema<ArtistCreate>(
   {
     name: { type: String, required: true },
     description: { type: String, required: true },
-    cover: { type: String, required: false },
+    coverImage: { type: String, required: false, default: null },
   },
   { timestamps: true },
 );
+
+ArtistSchema.set('toJSON', { virtuals: true });
 
 export default model<ArtistDocument>('Artist', ArtistSchema);
