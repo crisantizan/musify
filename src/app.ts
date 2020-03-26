@@ -7,6 +7,8 @@ import router from '@/routes/router';
 import { EnvService } from '@/services/env.service';
 import { responseTrasformPipe } from '@/common/http/pipes';
 import { HttpException } from './common/http/exceptions/http.exception';
+import { MulterError } from 'multer';
+import { HttpStatus } from './common/enums';
 
 const app = express();
 const { port, inDevelopment, env, mongoUri } = new EnvService();
@@ -45,8 +47,17 @@ const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   }
 
   // multer errors
-  if (err.code === 'LIMIT_FILE_SIZE') {
-    return res.status(400).json('file is too big');
+  if (err instanceof MulterError) {
+    switch (err.code) {
+      case 'LIMIT_FILE_SIZE':
+        return res
+          .status(HttpStatus.BAD_REQUEST)
+          .json('file uploader: file is too big');
+      case 'LIMIT_UNEXPECTED_FILE':
+        return res
+          .status(HttpStatus.BAD_REQUEST)
+          .json(`file uploader: ${err.field} is an unexpected field`);
+    }
   }
 };
 app.use(errorHandler);

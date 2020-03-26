@@ -2,6 +2,8 @@ import multer from 'multer';
 import { join, extname } from 'path';
 import { generateToken } from '@/helpers/shared.helper';
 import { FolderAssetsType } from '@/typings/shared.typing';
+import { getAssetPath } from '@/helpers/multer.helper';
+import { AssetsType, FolderAssetType } from '@/typings/asset.typing';
 
 // songs -> artist -> albums -> mp3 files
 
@@ -11,18 +13,12 @@ interface Options {
 }
 
 export function multerMiddleware(
-  folder: FolderAssetsType,
+  // folder: FolderAssetsType,
+  assetType: AssetsType,
+  folder: FolderAssetType,
   { fileFilter, limits }: Options,
 ) {
-  const destination = join(
-    __dirname,
-    '..',
-    '..',
-    '..',
-    'assets',
-    'uploads',
-    folder,
-  );
+  const destination = getAssetPath(assetType, folder)
 
   const storage = multer.diskStorage({
     destination,

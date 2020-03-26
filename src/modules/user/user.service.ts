@@ -8,7 +8,7 @@ import { Service } from '@/services/service';
 import { JwtService } from '@/services/jwt.service';
 import { RedisService } from '@/services/redis.service';
 import { Role } from '@/common/enums';
-import { removeImage } from '@/helpers/multer.helper';
+import { removeAsset, getAssetPath } from '@/helpers/multer.helper';
 import { getMongooseSession } from '@/db/session';
 import { isEquals } from '@/helpers/service.helper';
 
@@ -146,7 +146,7 @@ export class UserService extends Service {
       }
 
       // if the same data has been sent
-      if (isEquals(data, user)) {
+      if (!file && isEquals(data, user)) {
         throw this.response(
           HttpStatus.BAD_REQUEST,
           'the same data has been sent',
@@ -162,13 +162,13 @@ export class UserService extends Service {
       }
 
       // update
-      const result = await user.update(data).session(session);
-
+      await user.update(data).session(session);
       await session.commitTransaction();
 
       // delete old image of disk if other has been established
       if (!!oldImage && !!file) {
-        await removeImage(oldImage, 'avatars');
+        const path = getAssetPath('images', 'users');
+        await removeAsset(path, oldImage);
       }
 
       return this.response(HttpStatus.OK, 'user updated successfully');
@@ -176,7 +176,7 @@ export class UserService extends Service {
       await session.abortTransaction();
       if (!!file) {
         // remove image upladed
-        await removeImage(file.filename, 'avatars');
+        await removeAsset(file.path);
       }
       return error;
     } finally {
