@@ -10,7 +10,7 @@ import { RedisService } from '@/services/redis.service';
 import { Role } from '@/common/enums';
 import { removeAsset, getAssetPath } from '@/helpers/multer.helper';
 import { getMongooseSession } from '@/db/session';
-import { isEquals } from '@/helpers/service.helper';
+import { isEquals, mergeObject } from '@/helpers/service.helper';
 
 export class UserService extends Service {
   constructor(
@@ -170,7 +170,7 @@ export class UserService extends Service {
         await removeAsset(path, oldImage);
       }
 
-      return this.response(HttpStatus.OK, 'user updated successfully');
+      return this.response(HttpStatus.OK, mergeObject(data, user));
     } catch (error) {
       await session.abortTransaction();
       if (!!file) {
