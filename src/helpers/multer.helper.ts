@@ -63,21 +63,25 @@ export async function removeAsset(basePath: string, ...paths: string[]) {
 }
 
 /** get asset folder path */
-export function getAssetPath(assetType: AssetsType, folder: FolderAssetType) {
+export function getAssetPath(
+  assetType: AssetsType,
+  folder: FolderAssetType,
+  ...paths: string[]
+) {
   const assetsPath = join(__dirname, '..', 'assets', 'uploads', assetType);
 
   if (assetType === 'images') {
     // images/artists - images/users
-    return join(assetsPath, folder);
+    return join(assetsPath, folder, ...paths);
   }
 
   // folder of song type
   switch (folder as FolderSongType) {
     case 'albums':
-      return join(assetsPath, 'artists');
+      return join(assetsPath, 'artists', ...paths);
 
     case 'songs':
-      return join(assetsPath, 'artists', 'albums');
+      return join(assetsPath, 'artists', 'albums', ...paths);
 
     default:
       // artists

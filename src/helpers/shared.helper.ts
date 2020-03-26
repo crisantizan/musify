@@ -18,7 +18,7 @@ export function errorFieldObject(
 export function generateToken(length: number = 4, addDate = false): string {
   let randomString = '';
   const charts =
-    'aAbB0cCd#DeE1fFgGh2HiIjJ3kK$l4LmM5nNoOp6Pq-QrR7sStT8uUv_VwW9xXyYzZ';
+    'aAbB0cCdDeE1fFgGh2HiIjJ3kK$l4LmM5nNoOp6Pq-QrR7sStT8uUv_VwW9xXyYzZ';
 
   while (randomString.length < length) {
     randomString += charts.charAt(Math.round(Math.random() * charts.length));

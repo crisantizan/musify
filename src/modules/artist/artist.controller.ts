@@ -4,13 +4,14 @@ import { Request, Response } from 'express';
 import { ArtistService } from './artist.service';
 import { authGuard } from '@/common/http/guards/auth.guard';
 import { roleGuard } from '@/common/http/guards/role.guard';
-import { Role } from '@/common/enums';
+import { Role, HttpStatus } from '@/common/enums';
 import { validationPipe } from '@/common/http/pipes';
 import { artistSchema } from '@/common/joi-schemas';
 import { uploadArtistImageMiddleware } from '@/common/http/middlewares/upload-images.middleware';
 import { artistUpdateSchema } from '@/common/joi-schemas/artist-update.squema';
 import { PaginationOptions } from '@/typings/shared.typing';
 import { artistPaginationSchema } from '@/common/joi-schemas/artist-paginate.schema';
+import { getAssetPath } from '@/helpers/multer.helper';
 
 export class ArtistController extends Controller implements IController {
   public readonly route: string = '/artists';
@@ -23,6 +24,7 @@ export class ArtistController extends Controller implements IController {
   public async routes(): Promise<ControllerRoutes> {
     return {
       get: [
+        // get artist: pagination, filter and sort by name
         {
           path: '/',
           middlewares: [
@@ -31,6 +33,12 @@ export class ArtistController extends Controller implements IController {
           ],
           handler: this.getAll.bind(this),
         },
+        // get artist cover image
+        {
+          path: '/cover/:imagePath',
+          middlewares: [authGuard],
+          handler: this.getCoverImage.bind(this)
+        }
       ],
       post: [
         // create a new artist
@@ -61,7 +69,7 @@ export class ArtistController extends Controller implements IController {
     };
   }
 
-  /** get all artists */
+  /** [GET] get all artists */
   private async getAll(req: Request, res: Response) {
     try {
       const pagination: PaginationOptions = req.query;
@@ -69,6 +77,17 @@ export class ArtistController extends Controller implements IController {
       const result = await this.artistService.getAll(pagination);
 
       return this.sendResponse(result, res);
+    } catch (error) {
+      this.handleError(error, res);
+    }
+  }
+
+  /** [GET] get artist cover image */
+  private async getCoverImage(req: Request, res: Response) {
+    try {
+      const path = getAssetPath('images', 'artists', req.params.imagePath);
+
+      res.status(HttpStatus.OK).sendFile(path);
     } catch (error) {
       this.handleError(error, res);
     }

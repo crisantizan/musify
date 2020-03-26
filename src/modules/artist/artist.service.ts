@@ -24,7 +24,7 @@ export class ArtistService extends Service {
     const artists = await ArtistModel.paginate(query, {
       page,
       limit,
-      select: 'id name description',
+      select: 'id name description coverImage',
       sort: 'name'
     });
 
