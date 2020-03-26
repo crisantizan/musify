@@ -3,6 +3,7 @@ import { unlink } from 'fs-extra';
 import { join } from 'path';
 import { HttpException } from '@/common/http/exceptions/http.exception';
 import { HttpStatus } from '@/common/enums';
+import { FolderAssetsType } from '@/typings/shared.typing';
 
 export const multerImageFilter: multer.Options['fileFilter'] = (
   req,
@@ -43,7 +44,7 @@ export const multerSoundFilter: multer.Options['fileFilter'] = (
   );
 };
 
-export async function removeImage(filename: string, folder: string) {
+export async function removeImage(filename: FolderAssetsType, folder: string) {
   const fullpath = join(__dirname, '..', 'assets', 'uploads', folder, filename);
   console.log(fullpath);
   await unlink(fullpath);

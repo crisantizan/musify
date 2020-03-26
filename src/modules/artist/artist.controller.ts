@@ -7,6 +7,7 @@ import { roleGuard } from '@/common/http/guards/role.guard';
 import { Role } from '@/common/enums';
 import { bodyValidationPipe } from '@/common/http/pipes';
 import { artistSchema } from '@/common/joi-schemas';
+import { multerMiddleware } from '@/common/http/middlewares/multer.middleware';
 
 export class ArtistController extends Controller implements IController {
   public readonly route: string = '/artists';

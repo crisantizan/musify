@@ -1,8 +1,9 @@
 import multer from 'multer';
 import { join, extname } from 'path';
 import { generateToken } from '@/helpers/shared.helper';
+import { FolderAssetsType } from '@/typings/shared.typing';
 
-type FolderType = 'avatars' | 'covers' | 'songs';
+// songs -> artist -> albums -> mp3 files
 
 interface Options {
   fileFilter?: multer.Options['fileFilter'];
@@ -10,7 +11,7 @@ interface Options {
 }
 
 export function multerMiddleware(
-  folder: FolderType,
+  folder: FolderAssetsType,
   { fileFilter, limits }: Options,
 ) {
   const destination = join(

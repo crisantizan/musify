@@ -29,3 +29,5 @@ export interface ServiceResponse<T> {
 
 /** roles allowed values */
 export type RoleType = 'ADMIN' | 'USER';
+
+export type FolderAssetsType = 'images/users' | 'images/artists' | 'songs';
