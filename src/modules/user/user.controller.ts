@@ -7,6 +7,8 @@ import { authGuard } from '@/common/http/guards/auth.guard';
 import { uploadUserImageMiddleware } from '@/common/http/middlewares/upload-images.middleware';
 import { validationPipe } from '@/common/http/pipes';
 import { userUpdateSchema } from '@/common/joi-schemas/user-update.schema';
+import { getAssetPath } from '@/helpers/multer.helper';
+import { HttpStatus } from '@/common/enums';
 
 export class UserController extends Controller implements IController {
   public route: string = '/users';
@@ -34,6 +36,12 @@ export class UserController extends Controller implements IController {
           path: '/whoami',
           middlewares: [authGuard],
           handler: this.whoami.bind(this),
+        },
+        // get user image
+        {
+          path: '/image/:userImage',
+          middlewares: [authGuard],
+          handler: this.getImage.bind(this),
         },
         // get user
         {
@@ -101,6 +109,17 @@ export class UserController extends Controller implements IController {
       const result = await this.userService.whoami(req.user.id);
 
       return this.sendResponse(result, res);
+    } catch (error) {
+      this.handleError(error, res);
+    }
+  }
+
+  /** [GET] get user image */
+  private async getImage(req: Request, res: Response) {
+    try {
+      const path = getAssetPath('images', 'users', req.params.userImage);
+
+      res.status(HttpStatus.OK).sendFile(path);
     } catch (error) {
       this.handleError(error, res);
     }
