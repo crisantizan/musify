@@ -121,6 +121,6 @@ temp/
 # Ignore all local history of files
 .history
 
-src/assets/uploads/
+src/assets/uploads
 
 # End of https://www.gitignore.io/api/node,visualstudiocode
