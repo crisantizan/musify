@@ -8,3 +8,8 @@ export function serviceResponse<T>(
 ): ServiceResponse<T> {
   return { code, response };
 }
+
+/** verify if values object properties are equals at schema */
+export function isEquals(values: any, schema: any) {
+  return Object.keys(values).every(key => schema[key] === values[key]);
+}

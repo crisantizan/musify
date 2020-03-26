@@ -1,12 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
-import { unlink as removeFile } from 'fs-extra';
 import { IController, ControllerRoutes } from '@/typings/controller.typing';
 import { UserService } from './user.service';
 import { UserLogin, UserCreate } from './user.type';
 import { Controller } from '../controller';
 import { authGuard } from '@/common/http/guards/auth.guard';
-import { roleGuard } from '@/common/http/guards/role.guard';
-import { Role } from '@/common/enums';
 import { uploadUserImageMiddleware } from '@/common/http/middlewares/upload-user-image.middleware';
 import { bodyValidationPipe } from '@/common/http/pipes';
 import { userUpdateSchema } from '@/common/joi-schemas/user-update.schema';
@@ -43,7 +40,9 @@ export class UserController extends Controller implements IController {
         // create user
         {
           path: '/',
-          middlewares: [/* authGuard, roleGuard(Role.ADMIN) */],
+          middlewares: [
+            /* authGuard, roleGuard(Role.ADMIN) */
+          ],
           handler: this.createUser.bind(this),
         },
         // user login
@@ -151,11 +150,6 @@ export class UserController extends Controller implements IController {
 
       this.sendResponse(result, res);
     } catch (error) {
-      if (!!req.file) {
-        // remove image upladed
-        await removeFile(req.file.path);
-      }
-
       this.handleError(error, res);
     }
   }

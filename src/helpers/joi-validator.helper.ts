@@ -1,5 +1,5 @@
 import { ObjectSchema, ValidationError } from '@hapi/joi';
-import { serviceResponse } from './service-response.helper';
+import { serviceResponse } from './service.helper';
 import { HttpStatus } from '@/common/enums/http-status.enum';
 import { errorFieldObject } from './shared.helper';
 

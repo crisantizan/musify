@@ -10,6 +10,7 @@ import { RedisService } from '@/services/redis.service';
 import { Role } from '@/common/enums';
 import { removeImage } from '@/helpers/multer.helper';
 import { getMongooseSession } from '@/db/session';
+import { isEquals } from '@/helpers/service.helper';
 
 export class UserService extends Service {
   constructor(
@@ -109,29 +110,6 @@ export class UserService extends Service {
     data: Partial<UserCreate>,
     file?: Express.Multer.File,
   ) {
-    const session = await getMongooseSession();
-
-    session.startTransaction();
-    try {
-      const user = await UserModel.findById(userId);
-
-      await user?.update({ name: 'NEW NAME EDIT' }).session(session);
-
-      if (!!user?.name) {
-        throw 'ggg debe abortar';
-      }
-
-      await user?.update({ surname: 'NEW SURNAME' }).session(session);
-      await session.commitTransaction();
-
-      return this.response(200, 'holi');
-    } catch (error) {
-      await session.abortTransaction();
-      return this.response(405, error);
-    } finally {
-      session.endSession();
-    }
-
     if (!Object.keys(data).length) {
       throw this.response(
         HttpStatus.BAD_REQUEST,
@@ -139,34 +117,55 @@ export class UserService extends Service {
       );
     }
 
-    const user = await UserModel.findById(userId);
+    const session = await getMongooseSession();
 
-    if (!user) {
-      throw this.response(
-        HttpStatus.BAD_REQUEST,
-        'user not found, please login again',
-      );
+    session.startTransaction();
+    try {
+      const user = await UserModel.findById(userId);
+
+      if (!user) {
+        throw this.response(HttpStatus.NOT_FOUND, {
+          login: true,
+          message: 'token is corrupt, please login again',
+        });
+      }
+
+      // if the same data has been sent
+      if (isEquals(data, user)) {
+        throw this.response(
+          HttpStatus.BAD_REQUEST,
+          'the same data has been sent',
+        );
+      }
+
+      let oldImage = user.image;
+
+      // add new image
+      if (!!file) {
+        // assign new image
+        data.image = file.filename;
+      }
+
+      // update
+      const result = await user.update(data).session(session);
+
+      await session.commitTransaction();
+
+      // delete old image of disk if other has been established
+      if (!!oldImage && !!file) {
+        await removeImage(oldImage, 'avatars');
+      }
+
+      return this.response(HttpStatus.OK, 'user updated successfully');
+    } catch (error) {
+      await session.abortTransaction();
+      if (!!file) {
+        // remove image upladed
+        await removeImage(file.filename, 'avatars');
+      }
+      return error;
+    } finally {
+      session.endSession();
     }
-
-    // add new image
-    // if (!!file) {
-    //   // delete old image of disk
-    //   if (!!user.image) {
-    //     await removeImage(user.image, 'avatars');
-    //   }
-
-    //   // assign new image
-    //   data.image = file.filename;
-    // }
-
-    // // update
-    // const result = await user.update(data);
-
-    // return this.response(
-    //   HttpStatus.OK,
-    //   !!result.nModified
-    //     ? 'user updated successfully'
-    //     : 'the same data has been sent',
-    // );
   }
 }

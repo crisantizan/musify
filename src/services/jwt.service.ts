@@ -9,7 +9,7 @@ import {
 } from '@/typings/jwt.typing';
 import { SignOptions, sign, verify as verifyToken, decode } from 'jsonwebtoken';
 import { RedisService } from './redis.service';
-import { serviceResponse } from '@/helpers/service-response.helper';
+import { serviceResponse } from '@/helpers/service.helper';
 import { HttpStatus } from '@/common/enums';
 
 export class JwtService {
