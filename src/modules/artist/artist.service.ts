@@ -25,6 +25,7 @@ export class ArtistService extends Service {
       page,
       limit,
       select: 'id name description',
+      sort: 'name'
     });
 
     return this.response(HttpStatus.OK, artists);
