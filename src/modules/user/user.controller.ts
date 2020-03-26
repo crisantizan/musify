@@ -4,7 +4,7 @@ import { UserService } from './user.service';
 import { UserLogin, UserCreate } from './user.type';
 import { Controller } from '../controller';
 import { authGuard } from '@/common/http/guards/auth.guard';
-import { uploadUserImageMiddleware } from '@/common/http/middlewares/upload-user-image.middleware';
+import { uploadUserImageMiddleware } from '@/common/http/middlewares/upload-images.middleware';
 import { bodyValidationPipe } from '@/common/http/pipes';
 import { userUpdateSchema } from '@/common/joi-schemas/user-update.schema';
 

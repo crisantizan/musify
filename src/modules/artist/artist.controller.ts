@@ -8,6 +8,7 @@ import { Role } from '@/common/enums';
 import { bodyValidationPipe } from '@/common/http/pipes';
 import { artistSchema } from '@/common/joi-schemas';
 import { multerMiddleware } from '@/common/http/middlewares/multer.middleware';
+import { uploadArtistImageMiddleware } from '@/common/http/middlewares/upload-images.middleware';
 
 export class ArtistController extends Controller implements IController {
   public readonly route: string = '/artists';
@@ -22,6 +23,7 @@ export class ArtistController extends Controller implements IController {
       get: [
         {
           path: '/',
+          middlewares: [authGuard],
           handler: this.getAll.bind(this),
         },
       ],
@@ -32,6 +34,7 @@ export class ArtistController extends Controller implements IController {
           middlewares: [
             authGuard,
             roleGuard(Role.ADMIN),
+            uploadArtistImageMiddleware,
             await bodyValidationPipe(artistSchema),
           ],
           handler: this.create.bind(this),
@@ -41,14 +44,20 @@ export class ArtistController extends Controller implements IController {
   }
 
   /** get all artists */
-  private getAll(req: Request, res: Response) {
-    res.status(200).json('works!');
+  private async getAll(req: Request, res: Response) {
+    try {
+      const result = await this.artistService.getAll();
+
+      return this.sendResponse(result, res);
+    } catch (error) {
+      this.handleError(error, res);
+    }
   }
 
   /** [POST] create a new artist */
   private async create(req: Request, res: Response) {
     try {
-      const result = await this.artistService.create(req.body);
+      const result = await this.artistService.create(req.body, req.file);
       return this.sendResponse(result, res);
     } catch (error) {
       this.handleError(error, res);

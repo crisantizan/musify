@@ -9,13 +9,24 @@ export class ArtistService extends Service {
     super();
   }
 
+  /** get all */
+  public async getAll() {
+    const artists =  await ArtistModel.find();
+    return this.response(HttpStatus.OK, artists);
+  }
+
   /** create new artist */
-  public async create(data: ArtistCreate) {
+  public async create(data: ArtistCreate, file: Express.Multer.File) {
+    if (!!file) {
+      data.coverImage = file.filename;
+    }
+
     const artist = new ArtistModel(data);
     const newArtist = await artist.save();
-    const folderPath = getAssetPath('songs', 'artists');
-    // create folder, the name is his id
-    createAssetFolder(folderPath, newArtist.id);
+
+    const newFolderPath = getAssetPath('songs', 'artists');
+    // create folder to save his albums, the name is his id
+    createAssetFolder(newFolderPath, newArtist.id);
 
     return this.response(HttpStatus.CREATED, newArtist);
   }
