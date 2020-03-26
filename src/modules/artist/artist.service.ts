@@ -17,8 +17,15 @@ export class ArtistService extends Service {
   }
 
   /** get all */
-  public async getAll({ limit = 10, page = 1 }: PaginationOptions) {
-    const artists = await ArtistModel.paginate({}, { page, limit });
+  public async getAll({ limit = 10, page = 1, byName }: PaginationOptions) {
+    // filter
+    const query = !byName ? {} : { name: new RegExp(byName, 'i') };
+
+    const artists = await ArtistModel.paginate(query, {
+      page,
+      limit,
+      select: 'id name description',
+    });
 
     return this.response(HttpStatus.OK, artists);
   }

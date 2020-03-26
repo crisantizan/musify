@@ -5,4 +5,5 @@ import { PaginationOptions } from '@/typings/shared.typing';
 export const artistPaginationSchema = joi.object<PaginationOptions>({
   limit: joi.number().optional(),
   page: joi.number().optional(),
+  byName: joi.string().optional(),
 });

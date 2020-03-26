@@ -38,4 +38,6 @@ export interface PaginationOptions extends Object {
   limit?: number;
   /** current page */
   page?: number;
+  /** get only by name */
+  byName?: string;
 }
