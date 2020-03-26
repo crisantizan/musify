@@ -1,10 +1,12 @@
 import mongoose, { model, Document } from 'mongoose';
-import { Artist, ArtistCreate } from '@/modules/artist/artist.type';
+import paginate from 'mongoose-paginate-v2';
+import { Artist } from '@/modules/artist/artist.type';
+import { PaginationModel } from '@/typings/shared.typing';
 const { Schema } = mongoose;
 
 export interface ArtistDocument extends Artist, Document {}
 
-const ArtistSchema = new Schema<ArtistCreate>(
+const ArtistSchema = new Schema(
   {
     name: { type: String, required: true },
     description: { type: String, required: true },
@@ -13,6 +15,8 @@ const ArtistSchema = new Schema<ArtistCreate>(
   { timestamps: true },
 );
 
-ArtistSchema.set('toJSON', { virtuals: true });
+ArtistSchema.set('toJSON', { virtuals: true }).plugin(paginate);
 
-export const ArtistModel = model<ArtistDocument>('Artist', ArtistSchema);
+export const ArtistModel: PaginationModel<ArtistDocument> = model<
+  ArtistDocument
+>('Artist', ArtistSchema) as PaginationModel<ArtistDocument>;

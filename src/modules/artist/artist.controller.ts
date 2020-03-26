@@ -9,6 +9,7 @@ import { bodyValidationPipe } from '@/common/http/pipes';
 import { artistSchema } from '@/common/joi-schemas';
 import { uploadArtistImageMiddleware } from '@/common/http/middlewares/upload-images.middleware';
 import { artistUpdateSchema } from '@/common/joi-schemas/artist-update.squema';
+import { PaginationOptions } from '@/typings/shared.typing';
 
 export class ArtistController extends Controller implements IController {
   public readonly route: string = '/artists';
@@ -59,7 +60,10 @@ export class ArtistController extends Controller implements IController {
   /** get all artists */
   private async getAll(req: Request, res: Response) {
     try {
-      const result = await this.artistService.getAll();
+      const pagination: PaginationOptions = req.query;
+      console.log(pagination);
+
+      const result = await this.artistService.getAll(pagination);
 
       return this.sendResponse(result, res);
     } catch (error) {

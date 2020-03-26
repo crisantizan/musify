@@ -9,6 +9,7 @@ import {
 } from '@/helpers/multer.helper';
 import { getMongooseSession } from '@/db/session';
 import { isEquals, mergeObject } from '@/helpers/service.helper';
+import { PaginationOptions } from '@/typings/shared.typing';
 
 export class ArtistService extends Service {
   constructor() {
@@ -16,8 +17,12 @@ export class ArtistService extends Service {
   }
 
   /** get all */
-  public async getAll() {
-    const artists = await ArtistModel.find();
+  public async getAll({ limit, page }: PaginationOptions) {
+    limit = limit || 10;
+    page = page || 1;
+
+    const artists = await ArtistModel.paginate({}, { page, limit });
+
     return this.response(HttpStatus.OK, artists);
   }
 

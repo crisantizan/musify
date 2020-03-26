@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Document, PaginateModel } from 'mongoose';
 import { HttpStatus } from '@/common/enums/http-status.enum';
 
 /** add index signature */
@@ -30,4 +30,12 @@ export interface ServiceResponse<T> {
 /** roles allowed values */
 export type RoleType = 'ADMIN' | 'USER';
 
-export type FolderAssetsType = 'images/users' | 'images/artists' | 'songs';
+export interface PaginationModel<T extends Document> extends PaginateModel<T> {}
+
+/** properties to generate pagination */
+export interface PaginationOptions extends Object {
+  /** items per page */
+  limit?: number;
+  /** current page */
+  page?: number;
+}

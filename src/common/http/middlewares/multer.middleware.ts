@@ -1,7 +1,6 @@
 import multer from 'multer';
-import { join, extname } from 'path';
+import { extname } from 'path';
 import { generateToken } from '@/helpers/shared.helper';
-import { FolderAssetsType } from '@/typings/shared.typing';
 import { getAssetPath } from '@/helpers/multer.helper';
 import { AssetsType, FolderAssetType } from '@/typings/asset.typing';
 
@@ -13,12 +12,11 @@ interface Options {
 }
 
 export function multerMiddleware(
-  // folder: FolderAssetsType,
   assetType: AssetsType,
   folder: FolderAssetType,
   { fileFilter, limits }: Options,
 ) {
-  const destination = getAssetPath(assetType, folder)
+  const destination = getAssetPath(assetType, folder);
 
   const storage = multer.diskStorage({
     destination,
