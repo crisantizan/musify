@@ -29,6 +29,12 @@ export class UserController extends Controller implements IController {
           middlewares: [authGuard],
           handler: this.getAll.bind(this),
         },
+        // who i'm
+        {
+          path: '/whoami',
+          middlewares: [authGuard],
+          handler: this.whoami.bind(this),
+        },
         // get user
         {
           path: '/:id',
@@ -82,6 +88,17 @@ export class UserController extends Controller implements IController {
   private async createUser({ body }: Request, res: Response) {
     try {
       const result = await this.userService.save(body as UserCreate);
+
+      return this.sendResponse(result, res);
+    } catch (error) {
+      this.handleError(error, res);
+    }
+  }
+
+  /** [GET] who i'm */
+  private async whoami(req: Request, res: Response) {
+    try {
+      const result = await this.userService.whoami(req.user.id);
 
       return this.sendResponse(result, res);
     } catch (error) {

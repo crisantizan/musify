@@ -19,6 +19,21 @@ export class UserService extends Service {
   ) {
     super();
   }
+
+  /** who i'am */
+  public async whoami(userId: string) {
+    const user = await UserModel.findById(userId);
+
+    if (!user) {
+      throw this.response(HttpStatus.NOT_FOUND, {
+        login: true,
+        message: 'token is corrupt, please login again',
+      });
+    }
+
+    return this.response(HttpStatus.OK, user);
+  }
+
   /** get all users */
   public async getAll(): Promise<ServiceResponse<UserDocument[]>> {
     const users = await UserModel.find();
