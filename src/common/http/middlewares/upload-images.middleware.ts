@@ -17,3 +17,9 @@ export const uploadArtistImageMiddleware = multerMiddleware(
     limits: { fileSize: kilobytesTobytes(350) },
   },
 ).single('image');
+
+/** upload album image through «image» field */
+export const uploadAlbumImageMiddleware = multerMiddleware('images', 'albums', {
+  fileFilter: multerImageFilter,
+  limits: { fileSize: kilobytesTobytes(350) },
+}).single('image');

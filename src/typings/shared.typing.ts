@@ -41,3 +41,5 @@ export interface PaginationOptions extends Object {
   /** get only by name */
   byName?: string;
 }
+
+export type MulterFile = Express.Multer.File;

@@ -51,14 +51,31 @@ export class ArtistService extends Service {
       data.coverImage = file.filename;
     }
 
-    const artist = new ArtistModel(data);
-    const newArtist = await artist.save();
+    const session = await getMongooseSession();
+    session.startTransaction();
 
-    const newFolderPath = getAssetPath('songs', 'artists');
-    // create folder to save his albums, the name is his id
-    createAssetFolder(newFolderPath, newArtist.id);
+    try {
+      const artist = new ArtistModel(data);
+      const newArtist = await artist.save();
 
-    return this.response(HttpStatus.CREATED, newArtist);
+      const newFolderPath = getAssetPath('songs', 'artists');
+      // create folder to save his albums, the name is his id
+      await createAssetFolder(newFolderPath, newArtist.id);
+      await session.commitTransaction();
+
+      return this.response(HttpStatus.CREATED, newArtist);
+    } catch (error) {
+      await session.abortTransaction();
+
+      if (!!file) {
+        // remove image upladed
+        await removeAsset(file.path);
+      }
+
+      throw error;
+    } finally {
+      session.endSession();
+    }
   }
 
   /** update artist data */

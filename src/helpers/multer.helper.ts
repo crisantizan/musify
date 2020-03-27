@@ -8,6 +8,7 @@ import {
   FolderAssetType,
   FolderSongType,
 } from '@/typings/asset.typing';
+import { serviceResponse } from './service.helper';
 
 export const multerImageFilter: multer.Options['fileFilter'] = (
   req,
@@ -85,14 +86,16 @@ export function getAssetPath(
 
     default:
       // artists
-      return assetsPath;
+      return join(assetsPath, ...paths);
   }
 }
 
 export async function createAssetFolder(path: string, folderName: string) {
   try {
-    await mkdirp(join(path, folderName));
+    const fullPath = join(path, folderName);
+    await mkdirp(fullPath);
+    return fullPath;
   } catch (error) {
-    throw error;
+    throw serviceResponse(HttpStatus.INTERNAL_SERVER_ERROR, error);
   }
 }
