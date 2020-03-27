@@ -6,5 +6,4 @@ export const albumUpdateSchema = joi.object<AlbumCreate>({
   title: joi.string().optional(),
   description: joi.string().optional(),
   year: joi.number().optional(),
-  artist: joi.string().optional(),
 });

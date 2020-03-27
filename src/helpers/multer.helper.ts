@@ -59,7 +59,7 @@ export async function removeAsset(basePath: string, ...paths: string[]) {
       await remove(fullPath);
     }
   } catch (error) {
-    throw error;
+    throw { name: 'REMOVE_ASSET', error };
   }
 }
 

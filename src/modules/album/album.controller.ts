@@ -5,7 +5,7 @@ import { AlbumService } from './album.service';
 import { authGuard } from '@/common/http/guards/auth.guard';
 import { roleGuard } from '@/common/http/guards/role.guard';
 import { validationPipe } from '@/common/http/pipes';
-import { albumSchema } from '@/common/joi-schemas';
+import { albumSchema, albumUpdateSchema } from '@/common/joi-schemas';
 import { uploadAlbumImageMiddleware } from '@/common/http/middlewares/upload-images.middleware';
 import { removeAsset } from '@/helpers/multer.helper';
 
@@ -40,6 +40,18 @@ export class AlbumController extends Controller implements IController {
           handler: this.create.bind(this),
         },
       ],
+      put: [
+        {
+          path: '/:albumId',
+          middlewares: [
+            authGuard,
+            roleGuard('ADMIN'),
+            uploadAlbumImageMiddleware,
+            await validationPipe(albumUpdateSchema),
+          ],
+          handler: this.update.bind(this),
+        },
+      ],
     };
   }
 
@@ -60,6 +72,27 @@ export class AlbumController extends Controller implements IController {
       return this.sendResponse(result, res);
     } catch (error) {
       if (!!req.file) {
+        // remove image upladed
+        await removeAsset(req.file.path);
+      }
+
+      this.handleError(error, res);
+    }
+  }
+
+  /** [PUT] update album */
+  private async update(req: Request, res: Response) {
+    try {
+      const {
+        params: { albumId },
+        body,
+        file,
+      } = req;
+
+      const result = await this.albumService.update(albumId, body, file);
+      return this.sendResponse(result, res);
+    } catch (error) {
+      if (!!req.file && !!error.name && error.name !== 'REMOVE_ASSET') {
         // remove image upladed
         await removeAsset(req.file.path);
       }

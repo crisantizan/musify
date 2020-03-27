@@ -22,6 +22,10 @@ export function mergeObject<T>(newValues: any, schema: T) {
     }
   });
 
-
   return schema as T;
+}
+
+/** verify if a object is empty */
+export function objectIsEmpty(obj: Object) {
+  return Object.keys(obj).length === 0;
 }

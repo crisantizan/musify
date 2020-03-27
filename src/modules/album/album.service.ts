@@ -9,6 +9,7 @@ import {
 } from '@/helpers/multer.helper';
 import { HttpStatus } from '@/common/enums';
 import { getMongooseSession } from '@/db/session';
+import { objectIsEmpty, isEquals, mergeObject } from '@/helpers/service.helper';
 
 export class AlbumService extends Service {
   constructor() {
@@ -36,5 +37,53 @@ export class AlbumService extends Service {
 
     const newAlbum = await album.save();
     return this.response(HttpStatus.CREATED, newAlbum);
+  }
+
+  /** update album */
+  public async update(
+    albumId: string,
+    data: Partial<AlbumCreate>,
+    file?: MulterFile,
+  ) {
+
+    if (objectIsEmpty(data)) {
+      throw this.response(
+        HttpStatus.BAD_REQUEST,
+        'at least one field must be sent',
+      );
+    }
+
+    const album = await AlbumModel.findById(albumId);
+
+    // verify existence of album
+    if (!album) {
+      throw this.response(HttpStatus.NOT_FOUND, "album doesn't exists");
+    }
+
+    // if the same data has been sent
+    if (!file && isEquals(data, album)) {
+      throw this.response(
+        HttpStatus.BAD_REQUEST,
+        'the same data has been sent',
+      );
+    }
+
+    let oldImage = album.coverImage;
+
+    // add new image
+    if (!!file) {
+      // assign new image
+      data.coverImage = file.filename;
+    }
+
+    await album.update(data);
+
+    // delete old image of disk if other has been established
+    if (!!oldImage && !!file) {
+      const path = getAssetPath('images', 'albums');
+      await removeAsset(path, oldImage);
+    }
+
+    return this.response(HttpStatus.OK, mergeObject(data, album));
   }
 }
