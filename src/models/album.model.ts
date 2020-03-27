@@ -1,24 +1,25 @@
-import mongoose, { model } from 'mongoose';
-import { ArtistDocument } from './artist.model';
+import mongoose, { model, Document } from 'mongoose';
+import paginate from 'mongoose-paginate-v2';
+import { Album } from '@/modules/album/album.type';
+import { PaginationModel } from '@/typings/shared.typing';
 const { Schema } = mongoose;
 
-export interface AlbumDocument extends mongoose.Document {
-  title: string;
-  description: string;
-  year: number;
-  cover: string;
-  artist: ArtistDocument | string;
-}
+export interface AlbumDocument extends Album, Document {}
 
 const AlbumSchema = new Schema(
   {
     title: { type: String, required: true },
     description: { type: String, required: true },
     year: { type: Number, required: true },
-    cover: { type: String, required: false },
+    coverImage: { type: String, required: false, default: null },
     artist: { type: Schema.Types.ObjectId, ref: 'Artist', required: true },
   },
   { timestamps: true },
 );
 
-export const AlbumModel = model<AlbumDocument>('Album', AlbumSchema);
+AlbumSchema.plugin(paginate);
+
+export const AlbumModel = model<AlbumDocument>(
+  'Album',
+  AlbumSchema,
+) as PaginationModel<AlbumDocument>;
