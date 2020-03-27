@@ -15,7 +15,7 @@ const ArtistSchema = new Schema(
   { timestamps: true },
 );
 
-ArtistSchema.set('toJSON', { virtuals: true }).plugin(paginate);
+ArtistSchema.plugin(paginate);
 
 export const ArtistModel: PaginationModel<ArtistDocument> = model<
   ArtistDocument

@@ -1,6 +1,6 @@
 import { Service } from '@/services';
 import { ArtistCreate } from './artist.type';
-import { ArtistModel } from '@/models';
+import { ArtistModel, AlbumModel } from '@/models';
 import { HttpStatus } from '@/common/enums';
 import {
   getAssetPath,
@@ -25,10 +25,24 @@ export class ArtistService extends Service {
       page,
       limit,
       select: 'id name description coverImage',
-      sort: 'name'
+      sort: 'name',
     });
 
     return this.response(HttpStatus.OK, artists);
+  }
+
+  /** get one artist, all basic data of his albums */
+  public async getOne(artistId: string) {
+    const [artist, albums] = await Promise.all([
+      ArtistModel.findById(artistId).lean(),
+      AlbumModel.find({ artist: artistId }).lean(),
+    ]);
+
+    if (!artist) {
+      throw this.response(HttpStatus.NOT_FOUND, 'artist not found');
+    }
+
+    return this.response(HttpStatus.OK, { ...artist, albums });
   }
 
   /** create new artist */

@@ -7,7 +7,7 @@ export interface AlbumDocument extends mongoose.Document {
   description: string;
   year: number;
   cover: string;
-  artist: ArtistDocument;
+  artist: ArtistDocument | string;
 }
 
 const AlbumSchema = new Schema(

@@ -56,6 +56,15 @@ export class Controller {
       return res.status(code).json(response);
     }
 
+    // mongo objectId error
+    if (error.name === 'CastError' && error.kind === 'ObjectId') {
+      return res
+        .status(HttpStatus.BAD_REQUEST)
+        .json(
+          'ObjectId: argument passed in must be a single String of 12 bytes or a string of 24 hex characters',
+        );
+    }
+
     // internal server error
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(error);
   }

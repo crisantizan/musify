@@ -37,8 +37,14 @@ export class ArtistController extends Controller implements IController {
         {
           path: '/cover/:imagePath',
           middlewares: [authGuard],
-          handler: this.getCoverImage.bind(this)
-        }
+          handler: this.getCoverImage.bind(this),
+        },
+        // get one artist with his albums
+        {
+          path: '/:artistId',
+          middlewares: [authGuard],
+          handler: this.getOne.bind(this),
+        },
       ],
       post: [
         // create a new artist
@@ -75,6 +81,17 @@ export class ArtistController extends Controller implements IController {
       const pagination: PaginationOptions = req.query;
 
       const result = await this.artistService.getAll(pagination);
+
+      return this.sendResponse(result, res);
+    } catch (error) {
+      this.handleError(error, res);
+    }
+  }
+
+  /** [GET] get one artist with his albums */
+  public async getOne(req: Request, res: Response) {
+    try {
+      const result = await this.artistService.getOne(req.params.artistId);
 
       return this.sendResponse(result, res);
     } catch (error) {
