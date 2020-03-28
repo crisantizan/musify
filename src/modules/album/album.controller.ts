@@ -7,7 +7,8 @@ import { roleGuard } from '@/common/http/guards/role.guard';
 import { validationPipe } from '@/common/http/pipes';
 import { albumSchema, albumUpdateSchema } from '@/common/joi-schemas';
 import { uploadAlbumImageMiddleware } from '@/common/http/middlewares/upload-images.middleware';
-import { removeAsset } from '@/helpers/multer.helper';
+import { removeAsset, getAssetPath } from '@/helpers/multer.helper';
+import { HttpStatus } from '@/common/enums';
 
 export class AlbumController extends Controller implements IController {
   public readonly route = '/albums';
@@ -25,6 +26,12 @@ export class AlbumController extends Controller implements IController {
           path: '/',
           middlewares: [authGuard],
           handler: this.getAll.bind(this),
+        },
+        // get artist cover image
+        {
+          path: '/cover/:imagePath',
+          middlewares: [authGuard],
+          handler: this.getCoverImage.bind(this),
         },
       ],
       post: [
@@ -60,6 +67,17 @@ export class AlbumController extends Controller implements IController {
       const result = await this.albumService.getAll();
 
       return this.sendResponse(result, res);
+    } catch (error) {
+      this.handleError(error, res);
+    }
+  }
+
+  /** [GET] get album cover image */
+  private async getCoverImage(req: Request, res: Response) {
+    try {
+      const path = getAssetPath('images', 'albums', req.params.imagePath);
+
+      res.status(HttpStatus.OK).sendFile(path);
     } catch (error) {
       this.handleError(error, res);
     }
