@@ -5,7 +5,11 @@ import { AlbumService } from './album.service';
 import { authGuard } from '@/common/http/guards/auth.guard';
 import { roleGuard } from '@/common/http/guards/role.guard';
 import { validationPipe } from '@/common/http/pipes';
-import { albumSchema, albumUpdateSchema } from '@/common/joi-schemas';
+import {
+  albumSchema,
+  albumUpdateSchema,
+  albumPaginationSchema,
+} from '@/common/joi-schemas';
 import { uploadAlbumImageMiddleware } from '@/common/http/middlewares/upload-images.middleware';
 import { removeAsset, getAssetPath } from '@/helpers/multer.helper';
 import { HttpStatus } from '@/common/enums';
@@ -22,10 +26,14 @@ export class AlbumController extends Controller implements IController {
   public async routes(): Promise<ControllerRoutes> {
     return {
       get: [
+        // search albums and paginate
         {
           path: '/',
-          middlewares: [authGuard],
-          handler: this.getAll.bind(this),
+          middlewares: [
+            authGuard,
+            await validationPipe(albumPaginationSchema, 'query'),
+          ],
+          handler: this.searchAndPaginate.bind(this),
         },
         // get artist cover image
         {
@@ -62,9 +70,10 @@ export class AlbumController extends Controller implements IController {
     };
   }
 
-  private async getAll(req: Request, res: Response) {
+  /** search albums and paginate */
+  private async searchAndPaginate(req: Request, res: Response) {
     try {
-      const result = await this.albumService.getAll();
+      const result = await this.albumService.searchAndPaginate(req.query);
 
       return this.sendResponse(result, res);
     } catch (error) {

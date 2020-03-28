@@ -9,7 +9,7 @@ import {
 } from '@/helpers/multer.helper';
 import { getMongooseSession } from '@/db/session';
 import { isEquals, mergeObject } from '@/helpers/service.helper';
-import { PaginationOptions } from '@/typings/shared.typing';
+import { PaginationArtistOptions } from '@/typings/shared.typing';
 
 export class ArtistService extends Service {
   constructor() {
@@ -17,7 +17,11 @@ export class ArtistService extends Service {
   }
 
   /** get all */
-  public async getAll({ limit = 10, page = 1, byName }: PaginationOptions) {
+  public async getAll({
+    limit = 10,
+    page = 1,
+    byName,
+  }: PaginationArtistOptions) {
     // filter
     const query = !byName ? {} : { name: new RegExp(byName, 'i') };
 

@@ -1,8 +1,8 @@
 import joi from '@hapi/joi';
-import { PaginationOptions } from '@/typings/shared.typing';
+import { PaginationArtistOptions } from '@/typings/shared.typing';
 
 /** joi artist pagination schema */
-export const artistPaginationSchema = joi.object<PaginationOptions>({
+export const artistPaginationSchema = joi.object<PaginationArtistOptions>({
   limit: joi.number().optional(),
   page: joi.number().optional(),
   byName: joi.string().optional(),

@@ -1,3 +1,4 @@
+export { albumPaginationSchema } from './album-pagination.schema';
 export { albumUpdateSchema } from './album-update.schema';
 export { albumSchema } from './album.schema';
 export { artistPaginationSchema } from './artist-paginate.schema';

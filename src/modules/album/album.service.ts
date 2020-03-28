@@ -1,7 +1,7 @@
 import { Service } from '@/services';
 import { AlbumCreate } from './album.type';
 import { AlbumModel, ArtistModel } from '@/models';
-import { MulterFile } from '@/typings/shared.typing';
+import { MulterFile, PaginationAlbumOptions } from '@/typings/shared.typing';
 import {
   getAssetPath,
   createAssetFolder,
@@ -9,7 +9,12 @@ import {
 } from '@/helpers/multer.helper';
 import { HttpStatus } from '@/common/enums';
 import { getMongooseSession } from '@/db/session';
-import { objectIsEmpty, isEquals, mergeObject } from '@/helpers/service.helper';
+import {
+  objectIsEmpty,
+  isEquals,
+  mergeObject,
+  removeUndefinedProps,
+} from '@/helpers/service.helper';
 
 export class AlbumService extends Service {
   constructor() {
@@ -18,6 +23,38 @@ export class AlbumService extends Service {
 
   public async getAll() {
     const albums = await AlbumModel.find();
+
+    return this.response(HttpStatus.OK, albums);
+  }
+
+  /** search albums and paginate */
+  public async searchAndPaginate({
+    limit = 10,
+    page = 1,
+    byArtist,
+    title,
+    year,
+  }: PaginationAlbumOptions) {
+    // filter
+    const query: any =
+      !!byArtist || !!title || !!year
+        ? {
+            artist: byArtist,
+            title: !!title ? new RegExp(title, 'i') : undefined,
+            year,
+          }
+        : {};
+
+    removeUndefinedProps(query);
+
+    const albums = await AlbumModel.paginate(query, {
+      page,
+      limit,
+      lean: true,
+      select: 'id title year artist coverImage',
+      sort: 'title',
+      populate: { path: 'artist', select: 'id name' },
+    });
 
     return this.response(HttpStatus.OK, albums);
   }
@@ -45,7 +82,6 @@ export class AlbumService extends Service {
     data: Partial<AlbumCreate>,
     file?: MulterFile,
   ) {
-
     if (objectIsEmpty(data)) {
       throw this.response(
         HttpStatus.BAD_REQUEST,

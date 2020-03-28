@@ -1,5 +1,5 @@
 import { HttpStatus } from '@/common/enums/http-status.enum';
-import { ServiceResponse } from '@/typings/shared.typing';
+import { ServiceResponse, Index } from '@/typings/shared.typing';
 
 /** generate properties to return by a service http */
 export function serviceResponse<T>(
@@ -28,4 +28,9 @@ export function mergeObject<T>(newValues: any, schema: T) {
 /** verify if a object is empty */
 export function objectIsEmpty(obj: Object) {
   return Object.keys(obj).length === 0;
+}
+
+/** remove undefined properties */
+export function removeUndefinedProps(obj: Index<any>) {
+  Object.keys(obj).forEach(key => obj[key] === undefined && delete obj[key]);
 }

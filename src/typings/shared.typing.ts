@@ -38,8 +38,20 @@ export interface PaginationOptions extends Object {
   limit?: number;
   /** current page */
   page?: number;
+}
+
+export interface PaginationArtistOptions extends Object, PaginationOptions {
   /** get only by name */
   byName?: string;
+}
+
+export interface PaginationAlbumOptions extends Object, PaginationOptions {
+  /** get only by artist */
+  byArtist?: string;
+  /** get coincidences with the album name */
+  title?: string;
+  /** get by release year */
+  year?: number;
 }
 
 export type MulterFile = Express.Multer.File;
