@@ -117,7 +117,7 @@ export class UserController extends Controller implements IController {
   /** [GET] get user image */
   private async getImage(req: Request, res: Response) {
     try {
-      const path = getAssetPath('images', 'users', req.params.userImage);
+      const path = getAssetPath('IMAGES_USERS', req.params.userImage);
 
       res.status(HttpStatus.OK).sendFile(path);
     } catch (error) {

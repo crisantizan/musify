@@ -166,7 +166,7 @@ export class UserService extends Service {
 
       // delete old image of disk if other has been established
       if (!!oldImage && !!file) {
-        const path = getAssetPath('images', 'users');
+        const path = getAssetPath('IMAGES_USERS');
         await removeAsset(path, oldImage);
       }
 

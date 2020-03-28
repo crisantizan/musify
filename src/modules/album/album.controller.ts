@@ -90,7 +90,7 @@ export class AlbumController extends Controller implements IController {
   /** [GET] get album cover image */
   private async getCoverImage(req: Request, res: Response) {
     try {
-      const path = getAssetPath('images', 'albums', req.params.imagePath);
+      const path = getAssetPath('IMAGES_ALBUMS', req.params.imagePath);
 
       res.status(HttpStatus.OK).sendFile(path);
     } catch (error) {

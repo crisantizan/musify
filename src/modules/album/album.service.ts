@@ -126,7 +126,7 @@ export class AlbumService extends Service {
 
     // delete old image of disk if other has been established
     if (!!oldImage && !!file) {
-      const path = getAssetPath('images', 'albums');
+      const path = getAssetPath('IMAGES_ALBUMS');
       await removeAsset(path, oldImage);
     }
 

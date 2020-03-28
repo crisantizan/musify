@@ -1,8 +1,8 @@
-import multer from 'multer';
+import multer, { StorageEngine } from 'multer';
 import { extname } from 'path';
 import { generateToken } from '@/helpers/shared.helper';
 import { getAssetPath } from '@/helpers/multer.helper';
-import { AssetsType, FolderAssetType } from '@/typings/asset.typing';
+import { FolderAssetType } from '@/typings/asset.typing';
 
 // songs -> artist -> albums -> mp3 files
 
@@ -12,21 +12,11 @@ interface Options {
 }
 
 export function multerMiddleware(
-  assetType: AssetsType,
-  folder: FolderAssetType,
+  storage: StorageEngine,
   { fileFilter, limits }: Options,
 ) {
-  const destination = getAssetPath(assetType, folder);
-
-  const storage = multer.diskStorage({
-    destination,
-    filename: (req, file, cb) => {
-      const token = generateToken(10, true);
-      const extension = extname(file.originalname);
-
-      cb(null, `${token}${extension}`);
-    },
-  });
+  // const destination = getAssetPath(asset);
+  // const storage = storageFunct(destination);
 
   return multer({ storage, fileFilter, limits });
 }

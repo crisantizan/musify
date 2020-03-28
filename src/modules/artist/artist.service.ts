@@ -2,11 +2,7 @@ import { Service } from '@/services';
 import { ArtistCreate } from './artist.type';
 import { ArtistModel } from '@/models';
 import { HttpStatus } from '@/common/enums';
-import {
-  getAssetPath,
-  createAssetFolder,
-  removeAsset,
-} from '@/helpers/multer.helper';
+import { getAssetPath, removeAsset } from '@/helpers/multer.helper';
 import { getMongooseSession } from '@/db/session';
 import { isEquals, mergeObject } from '@/helpers/service.helper';
 import { PaginationArtistOptions } from '@/typings/shared.typing';
@@ -59,9 +55,9 @@ export class ArtistService extends Service {
       const artist = new ArtistModel(data);
       const newArtist = await artist.save();
 
-      const newFolderPath = getAssetPath('songs', 'artists');
-      // create folder to save his albums, the name is his id
-      await createAssetFolder(newFolderPath, newArtist.id);
+      // const newFolderPath = getAssetPath('songs', 'artists');
+      // // create folder to save his albums, the name is his id
+      // await createAssetFolder(newFolderPath, newArtist.id);
       await session.commitTransaction();
 
       return this.response(HttpStatus.CREATED, newArtist);
@@ -123,7 +119,7 @@ export class ArtistService extends Service {
 
       // delete old image of disk if other has been established
       if (!!oldImage && !!file) {
-        const path = getAssetPath('images', 'artists');
+        const path = getAssetPath('IMAGES_ARTISTS');
         await removeAsset(path, oldImage);
       }
 

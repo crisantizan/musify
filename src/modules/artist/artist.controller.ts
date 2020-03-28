@@ -102,7 +102,7 @@ export class ArtistController extends Controller implements IController {
   /** [GET] get artist cover image */
   private async getCoverImage(req: Request, res: Response) {
     try {
-      const path = getAssetPath('images', 'artists', req.params.imagePath);
+      const path = getAssetPath('IMAGES_ARTISTS', req.params.imagePath);
 
       res.status(HttpStatus.OK).sendFile(path);
     } catch (error) {
