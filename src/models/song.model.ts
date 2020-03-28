@@ -1,18 +1,13 @@
-import mongoose, { model } from 'mongoose';
-import { AlbumDocument } from './album.model';
+import mongoose, { model, Document } from 'mongoose';
+import paginate from 'mongoose-paginate-v2';
+import { PaginationModel } from '@/typings/shared.typing';
+import { Song } from '@/modules/song/song.type';
 const { Schema } = mongoose;
 
-export interface SongDocument extends mongoose.Document {
-  number: string;
-  name: string;
-  duration: number;
-  file: string;
-  album: AlbumDocument;
-}
+export interface SongDocument extends Song, Document {}
 
 const SongSchema = new Schema(
   {
-    number: { type: String, required: true },
     name: { type: String, required: true },
     duration: { type: String, required: true },
     file: { type: String, required: true },
@@ -21,4 +16,9 @@ const SongSchema = new Schema(
   { timestamps: true },
 );
 
-export const SongModel = model<SongDocument>('Song', SongSchema);
+SongSchema.plugin(paginate);
+
+export const SongModel = model<SongDocument>(
+  'Song',
+  SongSchema,
+) as PaginationModel<SongDocument>;
