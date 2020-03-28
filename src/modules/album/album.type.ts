@@ -1,5 +1,5 @@
 import { TimestampsFields } from '@/typings/shared.typing';
-import { ArtistDocument } from '@/models';
+import { ArtistDocument, SongDocument } from '@/models';
 
 /** necesary data to create a one album */
 export interface AlbumCreate {
@@ -11,4 +11,6 @@ export interface AlbumCreate {
 }
 
 /** full data of album */
-export interface Album extends AlbumCreate, TimestampsFields {}
+export interface Album extends AlbumCreate, TimestampsFields {
+  songs?: SongDocument[];
+}

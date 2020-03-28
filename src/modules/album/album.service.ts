@@ -1,6 +1,6 @@
 import { Service } from '@/services';
 import { AlbumCreate } from './album.type';
-import { AlbumModel, ArtistModel } from '@/models';
+import { AlbumModel, ArtistModel, SongModel } from '@/models';
 import { MulterFile, PaginationAlbumOptions } from '@/typings/shared.typing';
 import {
   getAssetPath,
@@ -21,10 +21,20 @@ export class AlbumService extends Service {
     super();
   }
 
-  public async getAll() {
-    const albums = await AlbumModel.find();
+  /** get an album and his songs */
+  public async getOne(albumId: string) {
+    const album = await AlbumModel.findById(albumId).lean();
 
-    return this.response(HttpStatus.OK, albums);
+    if (!album) {
+      throw this.response(HttpStatus.NOT_FOUND, 'album not found');
+    }
+
+    // get his songs
+    const songs = await SongModel.find({ album: album._id })
+      .select('id name number duration file')
+      .lean();
+
+    return this.response(HttpStatus.OK, { ...album, songs });
   }
 
   /** search albums and paginate */

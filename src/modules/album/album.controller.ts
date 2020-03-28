@@ -41,6 +41,12 @@ export class AlbumController extends Controller implements IController {
           middlewares: [authGuard],
           handler: this.getCoverImage.bind(this),
         },
+        // get one album and his songs
+        {
+          path: '/:albumId',
+          middlewares: [authGuard],
+          handler: this.getOne.bind(this)
+        }
       ],
       post: [
         // create a new album
@@ -91,6 +97,17 @@ export class AlbumController extends Controller implements IController {
       this.handleError(error, res);
     }
   }
+
+    /** [GET] get one album and his songs */
+    private async getOne(req: Request, res: Response) {
+      try {
+        const result = await this.albumService.getOne(req.params.albumId);
+  
+        this.sendResponse(result, res);
+      } catch (error) {
+        this.handleError(error, res);
+      }
+    }
 
   /** [POST] create a new album */
   private async create(req: Request, res: Response) {
