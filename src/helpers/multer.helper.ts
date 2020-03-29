@@ -22,16 +22,15 @@ export function imageMulterStorage(asset: FolderAssetType) {
 }
 
 export function songMulterStorage() {
-  const destination = getAssetPath('SONGS');
+  const destination = getAssetPath('TEMP');
 
   return multer.diskStorage({
     destination,
     filename: (req, file, cb) => {
       console.log({ file });
-      const token = generateToken(10, true);
       const extension = extname(file.originalname);
 
-      cb(null, `${token}${extension}`);
+      cb(null, `${Date.now()}${extension}`);
     },
   });
 }

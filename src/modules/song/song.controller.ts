@@ -4,9 +4,8 @@ import { Request, Response } from 'express';
 import { SongService } from './song.service';
 import { authGuard } from '@/common/http/guards/auth.guard';
 import { roleGuard } from '@/common/http/guards/role.guard';
-import { validationPipe } from '@/common/http/pipes';
-import { songSchema } from '@/common/joi-schemas';
 import { uploadSongMiddleware } from '@/common/http/middlewares/upload-songs.middleware';
+import { HttpStatus } from '@/common/enums';
 
 export class SongController extends Controller implements IController {
   public readonly route: string = '/songs';
@@ -26,15 +25,17 @@ export class SongController extends Controller implements IController {
         },
       ],
       post: [
+        // create a new song
         {
           path: '/',
-          middlewares: [
-            authGuard,
-            roleGuard('ADMIN'),
-            uploadSongMiddleware,
-            await validationPipe(songSchema),
-          ],
+          middlewares: [authGuard, roleGuard('ADMIN')],
           handler: this.create.bind(this),
+        },
+        // upload song
+        {
+          path: '/upload',
+          middlewares: [authGuard, roleGuard('ADMIN'), uploadSongMiddleware],
+          handler: this.uploadSong.bind(this),
         },
       ],
     };
@@ -53,5 +54,10 @@ export class SongController extends Controller implements IController {
     } catch (error) {
       this.handleError(error, res);
     }
+  }
+
+  /** [POST] create an song */
+  private async uploadSong(req: Request, res: Response) {
+    res.status(HttpStatus.CREATED).json(req.file.filename);
   }
 }

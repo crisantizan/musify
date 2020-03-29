@@ -13,5 +13,6 @@ export type FolderAssetType =
   | 'IMAGES_USERS'
   | 'IMAGES_ARTISTS'
   | 'IMAGES_ALBUMS'
-  | 'SONGS';
+  | 'SONGS'
+  | 'TEMP';
 /** type of assets */
