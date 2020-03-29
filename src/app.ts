@@ -27,7 +27,7 @@ app
     }),
   )
   .use(express.json())
-  .use(express.urlencoded({ extended: false }))
+  .use(express.urlencoded({ extended: true }))
   .use(helmet());
 
 // use only in development

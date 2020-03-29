@@ -41,9 +41,9 @@ export function generateToken(length: number = 4, addDate = false): string {
 }
 
 /** from kilobytes to bytes */
-export const kilobytesTobytes = (kilobytes: number) => kilobytes * 1024;
+export const kilobytesTobytes = (kilobytes: number) => kilobytes * 1000;
 
 /** from megabytes to kilobytes */
 export function megabytesToBytes(megabytes: number) {
-  return megabytes * kilobytesTobytes(1024);
+  return megabytes * kilobytesTobytes(1000);
 }

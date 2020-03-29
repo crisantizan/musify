@@ -28,10 +28,10 @@ export function songMulterStorage() {
     destination,
     filename: (req, file, cb) => {
       console.log({ file });
-      console.log({ body: req.body });
-      // const extension = extname(file.originalname);
+      const token = generateToken(10, true);
+      const extension = extname(file.originalname);
 
-      cb(null, file.filename);
+      cb(null, `${token}${extension}`);
     },
   });
 }
@@ -55,13 +55,12 @@ export const multerImageFilter: multer.Options['fileFilter'] = (
   );
 };
 
-export const multerSoundFilter: multer.Options['fileFilter'] = (
+export const multerAudioFilter: multer.Options['fileFilter'] = (
   req,
   file,
   cb,
 ) => {
   const validExtensions = ['audio/mpeg'];
-  console.log(file);
 
   if (validExtensions.some(ext => file.mimetype === ext)) {
     return cb(null, true);
