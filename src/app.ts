@@ -42,8 +42,14 @@ app.use(responseTrasformPipe);
 app.use('/api', router);
 
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
+  console.log(err);
   if (err instanceof HttpException) {
     res.status(err.status).json(err.body);
+  }
+
+  // file not found
+  if (err.code === 'ENOENT') {
+    return res.status(err.statusCode).json('file not found');
   }
 
   // multer errors

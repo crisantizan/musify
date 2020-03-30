@@ -11,7 +11,7 @@ import { uploadArtistImageMiddleware } from '@/common/http/middlewares/upload-im
 import { artistUpdateSchema } from '@/common/joi-schemas/artist-update.squema';
 import { PaginationOptions } from '@/typings/shared.typing';
 import { artistPaginationSchema } from '@/common/joi-schemas/artist-paginate.schema';
-import { getAssetPath } from '@/helpers/multer.helper';
+import { getAssetPath, transformPath } from '@/helpers/multer.helper';
 
 export class ArtistController extends Controller implements IController {
   public readonly route: string = '/artists';
@@ -102,7 +102,10 @@ export class ArtistController extends Controller implements IController {
   /** [GET] get artist cover image */
   private async getCoverImage(req: Request, res: Response) {
     try {
-      const path = getAssetPath('IMAGES_ARTISTS', req.params.imagePath);
+      const path = getAssetPath(
+        'ARTISTS',
+        transformPath(req.params.imagePath, 'decode'),
+      );
 
       res.status(HttpStatus.OK).sendFile(path);
     } catch (error) {

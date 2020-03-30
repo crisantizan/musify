@@ -161,7 +161,7 @@ export class UserService extends Service {
       }
 
       // update
-      await user.update(data).session(session);
+      await user.updateOne(data).session(session);
       await session.commitTransaction();
 
       // delete old image of disk if other has been established

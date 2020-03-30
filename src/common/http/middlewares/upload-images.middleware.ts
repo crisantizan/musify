@@ -4,7 +4,7 @@ import { kilobytesTobytes } from '@/helpers/shared.helper';
 
 /** upload user image through «image» field */
 export const uploadUserImageMiddleware = multerMiddleware(
-  imageMulterStorage('IMAGES_USERS'),
+  imageMulterStorage(true),
   {
     fileFilter: multerImageFilter,
     limits: { fileSize: kilobytesTobytes(350) },
@@ -13,7 +13,7 @@ export const uploadUserImageMiddleware = multerMiddleware(
 
 /** upload artist image through «image» field */
 export const uploadArtistImageMiddleware = multerMiddleware(
-  imageMulterStorage('IMAGES_ARTISTS'),
+  imageMulterStorage(),
   {
     fileFilter: multerImageFilter,
     limits: { fileSize: kilobytesTobytes(350) },
@@ -22,7 +22,7 @@ export const uploadArtistImageMiddleware = multerMiddleware(
 
 /** upload album image through «image» field */
 export const uploadAlbumImageMiddleware = multerMiddleware(
-  imageMulterStorage('IMAGES_ALBUMS'),
+  imageMulterStorage(),
   {
     fileFilter: multerImageFilter,
     limits: { fileSize: kilobytesTobytes(350) },

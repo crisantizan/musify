@@ -2,13 +2,13 @@ import multer from 'multer';
 import { remove, mkdirp, pathExists } from 'fs-extra';
 import { join, extname } from 'path';
 import { HttpException } from '@/common/http/exceptions/http.exception';
-import { HttpStatus } from '@/common/enums';
+import { HttpStatus, ArtistFolder } from '@/common/enums';
 import { FolderAssetType } from '@/typings/asset.typing';
 import { serviceResponse } from './service.helper';
 import { generateToken } from './shared.helper';
 
-export function imageMulterStorage(asset: FolderAssetType) {
-  const destination = getAssetPath(asset);
+export function imageMulterStorage(userImage = false) {
+  const destination = getAssetPath(!userImage ? 'TEMP_IMAGES' : 'IMAGES_USERS');
 
   return multer.diskStorage({
     destination,
@@ -22,12 +22,11 @@ export function imageMulterStorage(asset: FolderAssetType) {
 }
 
 export function songMulterStorage() {
-  const destination = getAssetPath('TEMP');
+  const destination = getAssetPath('TEMP_SONGS');
 
   return multer.diskStorage({
     destination,
     filename: (req, file, cb) => {
-      console.log({ file });
       const extension = extname(file.originalname);
 
       cb(null, `${Date.now()}${extension}`);
@@ -88,20 +87,6 @@ export async function removeAsset(basePath: string, ...paths: string[]) {
 }
 
 /** get asset folder path */
-// export function getAssetPath2(
-//   { assetType, foldeImage }: GetAssetParams,
-//   ...paths: string[]
-// ) {
-//   const assetsPath = join(__dirname, '..', 'assets', 'uploads', assetType);
-
-//   return assetType === 'images'
-//     ? // images
-//       join(assetsPath, foldeImage!, ...paths)
-//     : // songs
-//       join(assetsPath, ...paths);
-// }
-
-/** get asset folder path */
 export function getAssetPath(asset: FolderAssetType, ...paths: string[]) {
   return join(
     __dirname,
@@ -113,32 +98,39 @@ export function getAssetPath(asset: FolderAssetType, ...paths: string[]) {
   );
 }
 
-/** get asset folder path */
-// export function getAssetPath1(
-//   assetType: AssetsType,
-//   folder: FolderAssetType,
-//   ...paths: string[]
-// ) {
-//   const assetsPath = join(__dirname, '..', 'assets', 'uploads', assetType);
+/** generate artist upload's path (from the artists folder) */
+export function genAlbumUploadPath(
+  artistId: string,
+  albumId: string,
+  ...paths: string[]
+) {
+  return join(artistId, ArtistFolder.ALBUMS, albumId, ...paths);
+}
 
-//   if (assetType === 'images') {
-//     // images/artists - images/users
-//     return join(assetsPath, folder, ...paths);
-//   }
+/** encode/decode an path */
+export function transformPath(value: string, mode: 'encode' | 'decode') {
+  return mode === 'encode'
+    ? // transform / to $
+      value.replace(/\//g, '$')
+    : // transform $ to /
+      value.replace(/\$/g, '/');
+}
 
-//   // folder of song type
-//   switch (folder) {
-//     // case 'albums':
-//     //   return join(assetsPath, 'artists', ...paths);
-
-//     // case 'songs':
-//     //   return join(assetsPath, 'artists', 'albums', ...paths);
-
-//     default:
-//       // artists
-//       return join(assetsPath, ...paths);
-//   }
-// }
+/** generate song upload's path (from the artists folder) */
+export function genSongUploadPath(
+  artistId: string,
+  albumId: string,
+  songId: string,
+  ...paths: string[]
+) {
+  return genAlbumUploadPath(
+    artistId,
+    albumId,
+    ArtistFolder.SONGS,
+    songId,
+    ...paths,
+  );
+}
 
 export async function createAssetFolder(path: string, folderName: string) {
   try {

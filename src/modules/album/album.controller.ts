@@ -11,7 +11,11 @@ import {
   albumPaginationSchema,
 } from '@/common/joi-schemas';
 import { uploadAlbumImageMiddleware } from '@/common/http/middlewares/upload-images.middleware';
-import { removeAsset, getAssetPath } from '@/helpers/multer.helper';
+import {
+  removeAsset,
+  getAssetPath,
+  transformPath,
+} from '@/helpers/multer.helper';
 import { HttpStatus } from '@/common/enums';
 
 export class AlbumController extends Controller implements IController {
@@ -45,8 +49,8 @@ export class AlbumController extends Controller implements IController {
         {
           path: '/:albumId',
           middlewares: [authGuard],
-          handler: this.getOne.bind(this)
-        }
+          handler: this.getOne.bind(this),
+        },
       ],
       post: [
         // create a new album
@@ -90,7 +94,11 @@ export class AlbumController extends Controller implements IController {
   /** [GET] get album cover image */
   private async getCoverImage(req: Request, res: Response) {
     try {
-      const path = getAssetPath('IMAGES_ALBUMS', req.params.imagePath);
+      const path = getAssetPath(
+        'ARTISTS',
+        // decode path
+        transformPath(req.params.imagePath, 'decode'),
+      );
 
       res.status(HttpStatus.OK).sendFile(path);
     } catch (error) {
@@ -98,16 +106,16 @@ export class AlbumController extends Controller implements IController {
     }
   }
 
-    /** [GET] get one album and his songs */
-    private async getOne(req: Request, res: Response) {
-      try {
-        const result = await this.albumService.getOne(req.params.albumId);
-  
-        this.sendResponse(result, res);
-      } catch (error) {
-        this.handleError(error, res);
-      }
+  /** [GET] get one album and his songs */
+  private async getOne(req: Request, res: Response) {
+    try {
+      const result = await this.albumService.getOne(req.params.albumId);
+
+      this.sendResponse(result, res);
+    } catch (error) {
+      this.handleError(error, res);
     }
+  }
 
   /** [POST] create a new album */
   private async create(req: Request, res: Response) {

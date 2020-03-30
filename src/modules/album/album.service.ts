@@ -1,4 +1,6 @@
 import { Service } from '@/services';
+import { Types, mongo } from 'mongoose';
+import { join } from 'path';
 import { AlbumCreate } from './album.type';
 import { AlbumModel, ArtistModel, SongModel } from '@/models';
 import { MulterFile, PaginationAlbumOptions } from '@/typings/shared.typing';
@@ -6,6 +8,8 @@ import {
   getAssetPath,
   createAssetFolder,
   removeAsset,
+  genAlbumUploadPath,
+  transformPath,
 } from '@/helpers/multer.helper';
 import { HttpStatus } from '@/common/enums';
 import { getMongooseSession } from '@/db/session';
@@ -15,6 +19,7 @@ import {
   mergeObject,
   removeUndefinedProps,
 } from '@/helpers/service.helper';
+import { move } from 'fs-extra';
 
 export class AlbumService extends Service {
   constructor() {
@@ -71,18 +76,32 @@ export class AlbumService extends Service {
 
   /** create a new album */
   public async create(data: AlbumCreate, file: MulterFile) {
-    if (!!file) {
-      data.coverImage = file.filename;
-    }
-
     // verify artist
     if (!(await ArtistModel.exists({ _id: data.artist }))) {
       throw this.response(HttpStatus.BAD_REQUEST, "the artist doesn't exist");
     }
 
-    const album = new AlbumModel(data);
+    const albumId = new mongo.ObjectId().toHexString();
 
+    if (!!file) {
+      // path to save in database
+      const pathToBD = genAlbumUploadPath(
+        data.artist as string,
+        albumId,
+        file.filename,
+      );
+      // final path
+      const fullPath = getAssetPath('ARTISTS', pathToBD);
+
+      // move from temp files to final folder
+      await move(file.path, fullPath);
+
+      data.coverImage = transformPath(pathToBD, 'encode');;
+    }
+
+    const album = new AlbumModel({ _id: albumId, ...data });
     const newAlbum = await album.save();
+
     return this.response(HttpStatus.CREATED, newAlbum);
   }
 
@@ -92,7 +111,7 @@ export class AlbumService extends Service {
     data: Partial<AlbumCreate>,
     file?: MulterFile,
   ) {
-    if (objectIsEmpty(data)) {
+    if (!file && objectIsEmpty(data)) {
       throw this.response(
         HttpStatus.BAD_REQUEST,
         'at least one field must be sent',
@@ -114,19 +133,32 @@ export class AlbumService extends Service {
       );
     }
 
-    let oldImage = album.coverImage;
+    const oldImage = !!album.coverImage
+      ? transformPath(album.coverImage!, 'decode')
+      : '';
 
     // add new image
     if (!!file) {
+      // path to save in database
+      const pathToBD = genAlbumUploadPath(
+        String(album.artist),
+        String(album._id),
+        file.filename,
+      );
+      // final path
+      const fullPath = getAssetPath('ARTISTS', pathToBD);
+      // move from temp files to final folder
+      await move(file.path, fullPath);
+
       // assign new image
-      data.coverImage = file.filename;
+      data.coverImage = transformPath(pathToBD, 'encode');
     }
 
-    await album.update(data);
+    await album.updateOne(data);
 
     // delete old image of disk if other has been established
     if (!!oldImage && !!file) {
-      const path = getAssetPath('IMAGES_ALBUMS');
+      const path = getAssetPath('ARTISTS');
       await removeAsset(path, oldImage);
     }
 
