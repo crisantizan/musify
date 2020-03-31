@@ -6,6 +6,15 @@ import { authGuard } from '@/common/http/guards/auth.guard';
 import { roleGuard } from '@/common/http/guards/role.guard';
 import { uploadSongMiddleware } from '@/common/http/middlewares/upload-songs.middleware';
 import { HttpStatus } from '@/common/enums';
+import { validationPipe } from '@/common/http/pipes';
+import { songSchema } from '@/common/joi-schemas';
+import { uploadTempImageMiddleware } from '@/common/http/middlewares/upload-images.middleware';
+import { pathExists } from 'fs-extra';
+import {
+  getAssetPath,
+  removeAsset,
+  transformPath,
+} from '@/helpers/multer.helper';
 
 export class SongController extends Controller implements IController {
   public readonly route: string = '/songs';
@@ -23,12 +32,23 @@ export class SongController extends Controller implements IController {
           middlewares: [authGuard, roleGuard('ADMIN')],
           handler: this.getAll.bind(this),
         },
+        // get cover image and audio file
+        {
+          path: '/file/:path',
+          middlewares: [/* authGuard */],
+          handler: this.getCoverImageAndAudio.bind(this),
+        },
       ],
       post: [
         // create a new song
         {
           path: '/',
-          middlewares: [authGuard, roleGuard('ADMIN')],
+          middlewares: [
+            authGuard,
+            roleGuard('ADMIN'),
+            uploadTempImageMiddleware,
+            await validationPipe(songSchema),
+          ],
           handler: this.create.bind(this),
         },
         // upload song
@@ -46,12 +66,33 @@ export class SongController extends Controller implements IController {
     res.status(200).json('works!');
   }
 
+  /** [GET] get cover image and audio file */
+  private async getCoverImageAndAudio(req: Request, res: Response) {
+    try {
+      const path = getAssetPath(
+        'ARTISTS',
+        // decode path
+        transformPath(req.params.path, 'decode'),
+      );
+
+      res.status(HttpStatus.OK).sendFile(path);
+    } catch (error) {
+      this.handleError(error, res);
+    }
+  }
+
   /** [POST] create an song */
   private async create(req: Request, res: Response) {
     try {
-      console.log(req.file);
-      res.json('ok');
+      const result = await this.songService.create(req.body, req.file);
+      this.sendResponse(result, res);
     } catch (error) {
+      if (!!req.file) {
+        const path = getAssetPath('TEMP_IMAGES', req.file.filename);
+
+        // remove image recent uploaded
+        (await pathExists(path)) && (await removeAsset(path));
+      }
       this.handleError(error, res);
     }
   }

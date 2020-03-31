@@ -96,7 +96,7 @@ export class AlbumService extends Service {
       // move from temp files to final folder
       await move(file.path, fullPath);
 
-      data.coverImage = transformPath(pathToBD, 'encode');;
+      data.coverImage = transformPath(pathToBD, 'encode');
     }
 
     const album = new AlbumModel({ _id: albumId, ...data });

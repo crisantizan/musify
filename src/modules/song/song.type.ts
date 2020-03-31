@@ -6,10 +6,15 @@ export interface SongCreate {
   name: string;
   duration: number;
   file: string;
-  album: string | AlbumDocument;
+  /** album id to assign */
+  album: string;
+  coverImage?: string;
 }
 
 /** full data of an song */
-export interface Song extends SongCreate, TimestampsFields {
-  album: AlbumDocument;
+export interface Song extends TimestampsFields {
+  name: string;
+  duration: number;
+  file: string;
+  album: string | AlbumDocument;
 }

@@ -10,6 +10,7 @@ const SongSchema = new Schema(
   {
     name: { type: String, required: true },
     duration: { type: String, required: true },
+    coverImage: { type: String, required: false, default: null },
     file: { type: String, required: true },
     album: { type: Schema.Types.ObjectId, ref: 'Album', required: true },
   },
