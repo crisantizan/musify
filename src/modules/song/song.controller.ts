@@ -1,3 +1,5 @@
+const ms = require('mediaserver');
+import { extname } from 'path';
 import { Controller } from '../controller';
 import { IController, ControllerRoutes } from '@/typings/controller.typing';
 import { Request, Response } from 'express';
@@ -35,7 +37,7 @@ export class SongController extends Controller implements IController {
         // get cover image and audio file
         {
           path: '/file/:path',
-          middlewares: [/* authGuard */],
+          middlewares: [authGuard],
           handler: this.getCoverImageAndAudio.bind(this),
         },
       ],
@@ -69,13 +71,21 @@ export class SongController extends Controller implements IController {
   /** [GET] get cover image and audio file */
   private async getCoverImageAndAudio(req: Request, res: Response) {
     try {
-      const path = getAssetPath(
+      const { path } = req.params;
+      const ext = extname(path);
+
+      const fullPath = getAssetPath(
         'ARTISTS',
         // decode path
         transformPath(req.params.path, 'decode'),
       );
 
-      res.status(HttpStatus.OK).sendFile(path);
+      if (ext === '.mp3') {
+        ms.pipe(req, res, fullPath);
+        return;
+      }
+
+      res.status(HttpStatus.OK).sendFile(fullPath);
     } catch (error) {
       this.handleError(error, res);
     }
