@@ -9,7 +9,7 @@ import { roleGuard } from '@/common/http/guards/role.guard';
 import { uploadSongMiddleware } from '@/common/http/middlewares/upload-songs.middleware';
 import { HttpStatus } from '@/common/enums';
 import { validationPipe } from '@/common/http/pipes';
-import { songSchema } from '@/common/joi-schemas';
+import { songSchema, songUpdateSchema } from '@/common/joi-schemas';
 import { uploadTempImageMiddleware } from '@/common/http/middlewares/upload-images.middleware';
 import { pathExists } from 'fs-extra';
 import {
@@ -37,7 +37,7 @@ export class SongController extends Controller implements IController {
         // get cover image and audio file
         {
           path: '/file/:path',
-          middlewares: [authGuard],
+          // middlewares: [authGuard],
           handler: this.getCoverImageAndAudio.bind(this),
         },
       ],
@@ -58,6 +58,19 @@ export class SongController extends Controller implements IController {
           path: '/upload',
           middlewares: [authGuard, roleGuard('ADMIN'), uploadSongMiddleware],
           handler: this.uploadSong.bind(this),
+        },
+      ],
+      put: [
+        // update song
+        {
+          path: '/:songId',
+          middlewares: [
+            authGuard,
+            roleGuard('ADMIN'),
+            uploadTempImageMiddleware,
+            await validationPipe(songUpdateSchema),
+          ],
+          handler: this.update.bind(this),
         },
       ],
     };
@@ -99,10 +112,30 @@ export class SongController extends Controller implements IController {
     } catch (error) {
       if (!!req.file) {
         const path = getAssetPath('TEMP_IMAGES', req.file.filename);
-
         // remove image recent uploaded
-        (await pathExists(path)) && (await removeAsset(path));
+        await removeAsset(path);
       }
+      this.handleError(error, res);
+    }
+  }
+
+  /** [PUT] update an song */
+  private async update(req: Request, res: Response) {
+    try {
+      const result = await this.songService.update(
+        req.params.songId,
+        req.body,
+        req.file,
+      );
+
+      this.sendResponse(result, res);
+    } catch (error) {
+      // if (!!req.file) {
+      //   const path = getAssetPath('TEMP_IMAGES', req.file.filename);
+
+      //   // remove image recent uploaded
+      //   (await pathExists(path)) && (await removeAsset(path));
+      // }
       this.handleError(error, res);
     }
   }
