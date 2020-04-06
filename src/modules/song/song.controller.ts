@@ -11,7 +11,6 @@ import { HttpStatus } from '@/common/enums';
 import { validationPipe } from '@/common/http/pipes';
 import { songSchema, songUpdateSchema } from '@/common/joi-schemas';
 import { uploadTempImageMiddleware } from '@/common/http/middlewares/upload-images.middleware';
-import { pathExists } from 'fs-extra';
 import {
   getAssetPath,
   removeAsset,
@@ -37,7 +36,7 @@ export class SongController extends Controller implements IController {
         // get cover image and audio file
         {
           path: '/file/:path',
-          // middlewares: [authGuard],
+          middlewares: [authGuard],
           handler: this.getCoverImageAndAudio.bind(this),
         },
       ],
@@ -130,12 +129,6 @@ export class SongController extends Controller implements IController {
 
       this.sendResponse(result, res);
     } catch (error) {
-      // if (!!req.file) {
-      //   const path = getAssetPath('TEMP_IMAGES', req.file.filename);
-
-      //   // remove image recent uploaded
-      //   (await pathExists(path)) && (await removeAsset(path));
-      // }
       this.handleError(error, res);
     }
   }

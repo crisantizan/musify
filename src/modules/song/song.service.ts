@@ -11,7 +11,6 @@ import {
   getAssetPath,
   transformPath,
   removeAsset,
-  genAlbumUploadPath,
 } from '@/helpers/multer.helper';
 import { move } from 'fs-extra';
 import {
@@ -74,11 +73,6 @@ export class SongService extends Service {
     // new sound filename
     const newSoundFileName = data.file;
 
-    // first: new address, second: old address
-    // const soundPaths: string[] = [];
-
-    // let [oldSoundFileFullPath, soundFileFullPath] = ['', ''];
-
     let soundDestination = '';
     // if an audio file has been sent
     if (!!newSoundFileName) {
@@ -100,62 +94,17 @@ export class SongService extends Service {
       );
 
       data.file = song.file;
-      // data.file = transformPath(
-      //   join(currentSongFolder, newSoundFileName!),
-      //   'encode',
-      // );
-
-      // full path of the new sound file
-      // soundFileFullPath = getAssetPath('ARTISTS', currentSongFolder, newSoundFileName);
-
-      // full path of the old sound file
-      // oldSoundFileFullPath = getAssetPath(
-      //   'ARTISTS',
-      //   transformPath(song.file, 'decode'),
-      // );
-
-      // new paths
-      // soundPaths.push(
-      //   // source
-      //   getAssetPath('TEMP_SONGS', newSoundFileName),
-      //   // destination
-      //   getAssetPath('ARTISTS', transformPath(song.file, 'decode')),
-      // );
     }
 
-    // let [imageFullPath, oldImageFullPath] = ['', ''];
     let imageDestination = '';
 
-    // change image
-    if (!!imageFile) {
-      // assign cover image
-      // data.coverImage = transformPath(
-      //   join(currentSongFolder, imageFile.filename),
-      //   'encode',
-      // );
-
-      // full path of the cover image
-      // imageFullPath = getAssetPath(
-      //   'ARTISTS',
-      //   currentSongFolder,
-      //   imageFile.filename,
-      // );
-
-      // if the current song already has an cover image
-      if (!!song.coverImage) {
-        // oldImageFullPath = getAssetPath(
-        //   'ARTISTS',
-        //   transformPath(song.coverImage, 'decode'),
-        // );
-        imageDestination = getAssetPath(
-          'ARTISTS',
-          transformPath(song.coverImage, 'decode'),
-        );
-      }
+    // change image if the current song already has an cover image
+    if (!!imageFile && !!song.coverImage) {
+      imageDestination = getAssetPath(
+        'ARTISTS',
+        transformPath(song.coverImage, 'decode'),
+      );
     }
-
-    // let [newSongAlbumFolder, newImageSongFolder] = ['', ''];
-    // let [songAlbumFolder, imageSongFolder] = ['', ''];
 
     // if a new album is send, verify
     if (
@@ -185,25 +134,6 @@ export class SongService extends Service {
         data.file = transformPath(newSoundPath, 'encode');
 
         soundDestination = getAssetPath('ARTISTS', newSoundPath);
-        // full path of the new sound file
-        // soundFileFullPath = getAssetPath('ARTISTS', newSongFolder, newSoundFileName);
-
-        // full path of the old sound file
-        // oldSoundFileFullPath = transformPath(
-        //   join(newSongFolder, song.file.split('$')[5]),
-        //   'decode',
-        // );
-
-        // new paths
-        // soundPaths.push(
-        //   // source
-        //   getAssetPath('TEMP_SONGS', newSoundFileName),
-        //   // destination
-        //   getAssetPath(
-        //     'ARTISTS',
-        //     transformPath(join(newSongFolder, newSoundFileName), 'decode'),
-        //   ),
-        // );
       } else {
         // update current audio file path
         song.file = transformPath(
@@ -224,24 +154,9 @@ export class SongService extends Service {
         // assign new cover image path
         data.coverImage = transformPath(newImageFolder, 'encode');
 
-        // new full path of the cover image
-        // imageFullPath = getAssetPath(
-        //   'ARTISTS',
-        //   newSongFolder,
-        //   imageFile.filename,
-        // );
-
         // if the current song already has an cover image
         if (!!song.coverImage) {
           imageDestination = getAssetPath('ARTISTS', newImageFolder);
-          // oldImageFullPath = transformPath(
-          //   join(newSongFolder, song.coverImage.split('$')[5]),
-          //   'decode',
-          // );
-          // imageDestination = transformPath(
-          //   join(newSongFolder, song.coverImage.split('$')[5]),
-          //   'decode',
-          // );
         }
       } else {
         // update the current image file path, if there's
@@ -252,40 +167,7 @@ export class SongService extends Service {
           );
         }
       }
-
-      // if (!!song.coverImage) {
-      //   imageSongFolder = transformPath(
-      //     join(newSongFolder, song.coverImage.split('$')[5]),
-      //     'encode',
-      //   );
-      // }
-
-      // // assign the new address
-      // songAlbumFolder = transformPath(
-      //   join(newSongFolder, song.file.split('$')[5]),
-      //   'encode',
-      // );
     }
-
-    // // new sound file
-    // if (!!data.file) {
-    //   // assign the new address
-    //   data.file = transformPath(
-    //     join(newSongFolder || currentSongFolder, soundFileName!),
-    //     'encode',
-    //   );
-
-    //   soundFileFullPath = getAssetPath(
-    //     'ARTISTS',
-    //     currentSongFolder,
-    //     soundFileName!,
-    //   );
-
-    //   oldSoundFileFullPath = getAssetPath(
-    //     'ARTISTS',
-    //     transformPath(song.file, 'decode'),
-    //   );
-    // }
 
     try {
       // change song of album directory
@@ -310,11 +192,6 @@ export class SongService extends Service {
                 imageFile.filename,
               ),
             );
-
-        // // move image
-        // await move(imageFile.path, imageFullPath);
-        // // remove old image if there's
-        // !!oldImageFullPath && (await removeAsset(oldImageFullPath));
       }
 
       // new audio has been sent
@@ -324,23 +201,12 @@ export class SongService extends Service {
           soundDestination,
           { overwrite: true },
         ));
-      // !!soundPaths.length &&
-      //   (await move(soundPaths[0], soundPaths[1], { overwrite: true }));
-      // if (!!newSoundFileName) {
-      //   // move song
-      //   // await move(pathTempAudio, soundFileFullPath);
-      //   // // remove old sound file if there's
-      //   // !!oldSoundFileFullPath && (await removeAsset(oldSoundFileFullPath));
-      // }
 
       await song.updateOne(data);
 
       return this.response(HttpStatus.OK, mergeObject(data, song));
     } catch (error) {
       console.log(error);
-      // remove
-      // !!imageFullPath && (await removeAsset(imageFullPath));
-      // !!soundFileFullPath && (await removeAsset(soundFileFullPath));
       !!imageFile && (await removeAsset(imageFile.path));
 
       throw error;
@@ -388,10 +254,7 @@ export class SongService extends Service {
       );
 
       // asign cover image
-      data.coverImage = transformPath(
-        join(pathToDB, imageFileName),
-        'encode',
-      );
+      data.coverImage = transformPath(join(pathToDB, imageFileName), 'encode');
     }
 
     const originalName = data.file;
