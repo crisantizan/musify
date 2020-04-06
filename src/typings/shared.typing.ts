@@ -54,4 +54,11 @@ export interface PaginationAlbumOptions extends Object, PaginationOptions {
   year?: number;
 }
 
+export interface PaginationSongOptions extends Object, PaginationOptions {
+  /** get by album */
+  album?: string;
+  /** get by title */
+  name?: string;
+}
+
 export type MulterFile = Express.Multer.File;

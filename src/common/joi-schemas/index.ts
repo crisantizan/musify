@@ -1,3 +1,4 @@
+export { songPaginationSchema } from './song-pagination.schema';
 export { songSchema } from './song.schema';
 export { songUpdateSchema } from './song-update.schema';
 export { albumPaginationSchema } from './album-pagination.schema';

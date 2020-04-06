@@ -16,6 +16,7 @@ import {
   removeAsset,
   transformPath,
 } from '@/helpers/multer.helper';
+import { songPaginationSchema } from '@/common/joi-schemas/song-pagination.schema';
 
 export class SongController extends Controller implements IController {
   public readonly route: string = '/songs';
@@ -30,8 +31,8 @@ export class SongController extends Controller implements IController {
       get: [
         {
           path: '/',
-          middlewares: [authGuard, roleGuard('ADMIN')],
-          handler: this.getAll.bind(this),
+          middlewares: [authGuard, await validationPipe(songPaginationSchema)],
+          handler: this.searchAngPaginate.bind(this),
         },
         // get cover image and audio file
         {
@@ -76,8 +77,14 @@ export class SongController extends Controller implements IController {
   }
 
   /** [GET] get all */
-  private async getAll(req: Request, res: Response) {
-    res.status(200).json('works!');
+  private async searchAngPaginate(req: Request, res: Response) {
+    try {
+      const result = await this.songService.searchAndPaginate(req.query);
+
+      return this.sendResponse(result, res);
+    } catch (error) {
+      this.handleError(error, res);
+    }
   }
 
   /** [GET] get cover image and audio file */

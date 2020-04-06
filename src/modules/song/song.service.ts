@@ -1,11 +1,11 @@
 import { pathExists } from 'fs-extra';
-import { join, extname } from 'path';
+import { join } from 'path';
 import { Service } from '@/services';
 import { SongCreate, SongUpdate } from './song.type';
 import { AlbumModel, ArtistDocument, SongModel, AlbumDocument } from '@/models';
 import { HttpStatus } from '@/common/enums';
 import { mongo } from 'mongoose';
-import { MulterFile } from '@/typings/shared.typing';
+import { MulterFile, PaginationSongOptions } from '@/typings/shared.typing';
 import {
   genSongUploadPath,
   getAssetPath,
@@ -18,11 +18,44 @@ import {
   mergeObject,
   objectIsEmpty,
   assetFileName,
+  removeUndefinedProps,
 } from '@/helpers/service.helper';
 
 export class SongService extends Service {
   constructor() {
     super();
+  }
+
+  /** search song */
+  public async searchAndPaginate({
+    page = 1,
+    limit = 10,
+    album,
+    name,
+  }: PaginationSongOptions) {
+    // create filter
+    const query =
+      !!album || !!name
+        ? { album, name: !!name ? new RegExp(name, 'i') : undefined }
+        : {};
+
+    removeUndefinedProps(query);
+
+    const songs = await SongModel.paginate(query, {
+      page,
+      limit,
+      lean: true,
+      select: '_id name album',
+      populate: {
+        path: 'album',
+        select: 'artist',
+        lean: true,
+        populate: { path: 'artist', select: '_id name', lean: true },
+      },
+      sort: !!name ? 'name' : 'createdAt',
+    });
+
+    return this.response(HttpStatus.OK, songs);
   }
 
   /** update an song */
