@@ -1,3 +1,4 @@
+import { jobService } from './cron.service';
 export { EncryptService } from './encrypt.service';
 export { EnvService } from './env.service';
 export { JwtService } from './jwt.service';

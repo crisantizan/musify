@@ -8,6 +8,7 @@ import { config } from 'dotenv';
 import { getEnvVariablesPath } from '@/helpers/shared.helper';
 import { EnvMode } from './typings/shared.typing';
 import { mongoConnect } from './db/conection';
+import { jobService } from './services/cron.service';
 
 // load environment variables according to mode
 config({
@@ -24,9 +25,12 @@ async function bootstrap() {
   try {
     await mongoConnect(mongoUri);
 
-    app.listen(port, () =>
-      console.info(`[${env}] server running on port: ${port}`),
-    );
+    app.listen(port, () => {
+      console.info(`[${env}] server running on port: ${port}`);
+
+      // start running cron job
+      jobService.start();
+    });
   } catch (error) {
     console.error(error);
   }
