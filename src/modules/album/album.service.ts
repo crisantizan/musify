@@ -1,18 +1,15 @@
 import { Service } from '@/services';
-import { Types, mongo } from 'mongoose';
-import { join } from 'path';
+import { mongo } from 'mongoose';
 import { AlbumCreate } from './album.type';
 import { AlbumModel, ArtistModel, SongModel } from '@/models';
 import { MulterFile, PaginationAlbumOptions } from '@/typings/shared.typing';
 import {
   getAssetPath,
-  createAssetFolder,
   removeAsset,
   genAlbumUploadPath,
   transformPath,
 } from '@/helpers/multer.helper';
 import { HttpStatus } from '@/common/enums';
-import { getMongooseSession } from '@/db/session';
 import {
   objectIsEmpty,
   isEquals,
@@ -164,5 +161,19 @@ export class AlbumService extends Service {
     }
 
     return this.response(HttpStatus.OK, mergeObject(data, album));
+  }
+
+  /** remove an album */
+  public async remove(albumId: string) {
+    const album = await AlbumModel.findByIdAndRemove(albumId);
+
+    if (!album) {
+      throw this.response(HttpStatus.NOT_FOUND, "album doesn't exists");
+    }
+
+    const path = genAlbumUploadPath(String(album.artist), albumId);
+    await removeAsset(getAssetPath('ARTISTS', path));
+
+    return this.response(HttpStatus.OK, 'album removed successfully!');
   }
 }

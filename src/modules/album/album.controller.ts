@@ -66,6 +66,7 @@ export class AlbumController extends Controller implements IController {
         },
       ],
       put: [
+        // update an album
         {
           path: '/:albumId',
           middlewares: [
@@ -75,6 +76,14 @@ export class AlbumController extends Controller implements IController {
             await validationPipe(albumUpdateSchema),
           ],
           handler: this.update.bind(this),
+        },
+      ],
+      delete: [
+        // remove an album
+        {
+          path: '/:albumId',
+          middlewares: [authGuard, roleGuard('ADMIN')],
+          handler: this.remove.bind(this),
         },
       ],
     };
@@ -149,6 +158,17 @@ export class AlbumController extends Controller implements IController {
         await removeAsset(req.file.path);
       }
 
+      this.handleError(error, res);
+    }
+  }
+
+  /** [DELETE] remove an album */
+  public async remove(req: Request, res: Response) {
+    try {
+      const result = await this.albumService.remove(req.params.albumId);
+
+      this.sendResponse(result, res);
+    } catch (error) {
       this.handleError(error, res);
     }
   }
