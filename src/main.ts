@@ -29,7 +29,7 @@ async function bootstrap() {
       console.info(`[${env}] server running on port: ${port}`);
 
       // start running cron job
-      jobService.start();
+      env === 'production' && jobService.start();
     });
   } catch (error) {
     console.error(error);
