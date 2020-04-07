@@ -26,6 +26,22 @@ export class SongService extends Service {
     super();
   }
 
+  /** get one: all data */
+  public async getOne(songId: string) {
+    const song = await SongModel.findById(songId)
+      .lean()
+      .populate({
+        path: 'album',
+        populate: { path: 'artist', select: '_id name' },
+      });
+
+    if (!song) {
+      throw this.response(HttpStatus.NOT_FOUND, "song doesn't exists");
+    }
+
+    return this.response(HttpStatus.OK, song);
+  }
+
   /** search song */
   public async searchAndPaginate({
     page = 1,

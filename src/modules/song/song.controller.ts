@@ -40,6 +40,12 @@ export class SongController extends Controller implements IController {
           middlewares: [authGuard],
           handler: this.getCoverImageAndAudio.bind(this),
         },
+        // get one
+        {
+          path: '/:songId',
+          middlewares: [authGuard],
+          handler: this.getOne.bind(this),
+        },
       ],
       post: [
         // create a new song
@@ -74,6 +80,17 @@ export class SongController extends Controller implements IController {
         },
       ],
     };
+  }
+
+  /** [GET] get one */
+  private async getOne(req: Request, res: Response) {
+    try {
+      const result = await this.songService.getOne(req.params.songId);
+
+      return this.sendResponse(result, res);
+    } catch (error) {
+      this.handleError(error, res);
+    }
   }
 
   /** [GET] get all */
