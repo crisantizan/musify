@@ -6,10 +6,6 @@ Cisum is a small on-line music player developed in NodeJS (ExpressJS) and MongoD
 | ----------------- | -------------------- | ------------------------- |
 | /api              | yes                  | Bearer token              |
 
-[TOC]
-
-
-
 ## User roles
 
 | USER                        | ADMIN                               |
