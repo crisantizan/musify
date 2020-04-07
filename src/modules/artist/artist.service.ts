@@ -2,7 +2,7 @@ import { mongo } from 'mongoose';
 import { join } from 'path';
 import { Service } from '@/services';
 import { ArtistCreate } from './artist.type';
-import { ArtistModel } from '@/models';
+import { ArtistModel, AlbumModel, SongModel } from '@/models';
 import { HttpStatus } from '@/common/enums';
 import {
   getAssetPath,
@@ -97,8 +97,8 @@ export class ArtistService extends Service {
     }
 
     const oldImage = !!artist.coverImage
-    ? transformPath(artist.coverImage!, 'decode')
-    : '';
+      ? transformPath(artist.coverImage!, 'decode')
+      : '';
 
     // add new image
     if (!!file) {
@@ -123,5 +123,38 @@ export class ArtistService extends Service {
     }
 
     return this.response(HttpStatus.OK, mergeObject(data, artist));
+  }
+
+  /** remove an artist */
+  public async remove(artistId: string) {
+    const session = await getMongooseSession();
+    session.startTransaction();
+    try {
+      const artist = await ArtistModel.findByIdAndDelete(artistId).session(
+        session,
+      );
+
+      if (!artist) {
+        throw this.response(HttpStatus.NOT_FOUND, "artist doesn't exists");
+      }
+
+      const albums = await AlbumModel.find({ artist: artistId });
+
+      albums.forEach(async album => {
+        await AlbumModel.deleteMany({ _id: album._id }).session(session);
+        await SongModel.deleteMany({ album: album._id }).session(session);
+      });
+
+      await removeAsset(getAssetPath('ARTISTS', artistId));
+
+      await session.commitTransaction();
+
+      return this.response(HttpStatus.OK, 'artist removed successfully!');
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      session.endSession();
+    }
   }
 }

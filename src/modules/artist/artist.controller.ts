@@ -72,6 +72,13 @@ export class ArtistController extends Controller implements IController {
           handler: this.update.bind(this),
         },
       ],
+      delete: [
+        {
+          path: '/:artistId',
+          middlewares: [authGuard, roleGuard('ADMIN')],
+          handler: this.remove.bind(this),
+        },
+      ],
     };
   }
 
@@ -132,6 +139,16 @@ export class ArtistController extends Controller implements IController {
         req.file,
       );
 
+      return this.sendResponse(result, res);
+    } catch (error) {
+      this.handleError(error, res);
+    }
+  }
+
+  /** [DELETE] remove an artist */
+  private async remove(req: Request, res: Response) {
+    try {
+      const result = await this.artistService.remove(req.params.artistId);
       return this.sendResponse(result, res);
     } catch (error) {
       this.handleError(error, res);
