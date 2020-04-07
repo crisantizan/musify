@@ -28,16 +28,17 @@ export class AlbumService extends Service {
 
   /** get an album and his songs */
   public async getOne(albumId: string) {
-    const album = await AlbumModel.findById(albumId).lean();
+    const [album, songs] = await Promise.all([
+      AlbumModel.findById(albumId).lean(),
+      // get his songs
+      SongModel.find({ album: albumId })
+        .select('id name number duration coverImage file')
+        .lean(),
+    ]);
 
     if (!album) {
       throw this.response(HttpStatus.NOT_FOUND, 'album not found');
     }
-
-    // get his songs
-    const songs = await SongModel.find({ album: album._id })
-      .select('id name number duration file')
-      .lean();
 
     return this.response(HttpStatus.OK, { ...album, songs });
   }
