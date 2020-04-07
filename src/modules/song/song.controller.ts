@@ -79,6 +79,14 @@ export class SongController extends Controller implements IController {
           handler: this.update.bind(this),
         },
       ],
+      delete: [
+        // remove a song
+        {
+          path: '/:songId',
+          middlewares: [authGuard, roleGuard('ADMIN')],
+          handler: this.remove.bind(this),
+        },
+      ],
     };
   }
 
@@ -127,7 +135,7 @@ export class SongController extends Controller implements IController {
     }
   }
 
-  /** [POST] create an song */
+  /** [POST] create a song */
   private async create(req: Request, res: Response) {
     try {
       const result = await this.songService.create(req.body, req.file);
@@ -160,5 +168,16 @@ export class SongController extends Controller implements IController {
   /** [POST] create an song */
   private async uploadSong(req: Request, res: Response) {
     res.status(HttpStatus.CREATED).json(req.file.filename);
+  }
+
+  /** [DELETE] remove an song */
+  private async remove(req: Request, res: Response) {
+    try {
+      const result = await this.songService.remove(req.params.songId);
+
+      this.sendResponse(result, res);
+    } catch (error) {
+      this.handleError(error, res);
+    }
   }
 }

@@ -335,4 +335,29 @@ export class SongService extends Service {
       throw error;
     }
   }
+
+  /** remove a song */
+  public async remove(songId: string) {
+    try {
+      const song = await SongModel.findByIdAndRemove(songId);
+
+      if (!song) {
+        throw this.response(HttpStatus.NOT_FOUND, "song doesn't exists");
+      }
+
+      const [artistId, , albumId] = song.file.split('$');
+
+      const path = getAssetPath(
+        'ARTISTS',
+        genSongUploadPath(artistId, albumId, songId),
+      );
+
+      // remove folder of this song
+      await removeAsset(path);
+
+      return this.response(HttpStatus.OK, 'song removed successfully!');
+    } catch (error) {
+      throw error;
+    }
+  }
 }
