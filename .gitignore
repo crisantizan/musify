@@ -68,7 +68,7 @@ jspm_packages/
 
 # dotenv environment variables file
 .env.development
-# .env.production
+.env.production
 
 # rsa keys
 # src/assets/rsa-keys
