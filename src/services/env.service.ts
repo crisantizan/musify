@@ -3,6 +3,7 @@ import { parse as dotenvParse, DotenvParseOutput } from 'dotenv';
 import Joi from '@hapi/joi';
 import { getEnvVariablesPath } from '@/helpers/shared.helper';
 import { EnvMode } from '@/typings/shared.typing';
+import { pathExistsSync } from 'fs-extra';
 
 interface EnvConfig {
   HOST: string;
@@ -25,7 +26,15 @@ export class EnvService {
 
     // first instance
     const filePath = getEnvVariablesPath(process.env.NODE_ENV as EnvMode);
-    const config = dotenvParse(readFileSync(filePath));
+    if (process.env.NODE_ENV === 'production' && !pathExistsSync(filePath)) {
+    }
+
+    const manually =
+      process.env.NODE_ENV === 'production' && !pathExistsSync(filePath);
+
+    const config: EnvConfig | DotenvParseOutput = manually
+      ? this.getManually()
+      : dotenvParse(readFileSync(filePath));
 
     this.envConfig = this.validateInput(config);
     EnvService.instance = this;
@@ -33,8 +42,20 @@ export class EnvService {
     return this;
   }
 
+  /** get environment variables manually */
+  private getManually(): EnvConfig {
+    return {
+      HOST: process.env.HOST!,
+      PORT: (process.env.PORT as unknown) as number,
+      MONGO_URI: process.env.MONGO_URI!,
+      REDIS_HOST: process.env.REDIS_HOST!,
+      REDIS_PORT: (process.env.REDIS_PORT as unknown) as number,
+      REDIS_PASS: process.env.REDIS_PASS!,
+    };
+  }
+
   /** validate properties */
-  private validateInput(envConfig: DotenvParseOutput): EnvConfig {
+  private validateInput(envConfig: DotenvParseOutput | EnvConfig): EnvConfig {
     const schema = Joi.object({
       HOST: Joi.string()
         .default('localhost')
