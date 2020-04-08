@@ -9,6 +9,8 @@ interface EnvConfig {
   PORT: number;
   MONGO_URI: string;
   REDIS_PORT: number;
+  REDIS_HOST: string;
+  REDIS_PASS: string;
 }
 
 /** get environment variables */
@@ -39,6 +41,8 @@ export class EnvService {
         .required(),
       PORT: Joi.number().required(),
       MONGO_URI: Joi.string().required(),
+      REDIS_HOST: Joi.string().required(),
+      REDIS_PASS: Joi.string().optional(),
       REDIS_PORT: Joi.number()
         .default(6379)
         .required(),
@@ -78,8 +82,12 @@ export class EnvService {
     return this.envConfig.MONGO_URI;
   }
 
-  /** redis port */
-  get redisPort(): number {
-    return this.envConfig.REDIS_PORT;
+  /** redis config */
+  get redisConfig() {
+    return {
+      host: this.envConfig.REDIS_HOST,
+      port: this.envConfig.REDIS_PORT,
+      password: this.envConfig.REDIS_PASS,
+    };
   }
 }

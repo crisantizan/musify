@@ -9,12 +9,9 @@ export class RedisService extends Tedis {
       return RedisService.instance;
     }
 
-    const { host, redisPort } = new EnvService();
+    const { redisConfig } = new EnvService();
 
-    super({
-      host,
-      port: redisPort,
-    });
+    super(redisConfig);
 
     RedisService.instance = this;
 
