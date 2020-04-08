@@ -37,6 +37,8 @@ export class EnvService {
       : dotenvParse(readFileSync(filePath));
 
     this.envConfig = this.validateInput(config);
+
+    console.log(this.envConfig);
     EnvService.instance = this;
 
     return this;
