@@ -8,7 +8,9 @@ import { uploadUserImageMiddleware } from '@/common/http/middlewares/upload-imag
 import { validationPipe } from '@/common/http/pipes';
 import { userUpdateSchema } from '@/common/joi-schemas/user-update.schema';
 import { getAssetPath } from '@/helpers/multer.helper';
-import { HttpStatus } from '@/common/enums';
+import { HttpStatus, Role } from '@/common/enums';
+import { userLoginSchema, userSchema } from '@/common/joi-schemas';
+import { roleGuard } from '@/common/http/guards/role.guard';
 
 export class UserController extends Controller implements IController {
   public route: string = '/users';
@@ -55,13 +57,17 @@ export class UserController extends Controller implements IController {
         {
           path: '/',
           middlewares: [
-            /* authGuard, roleGuard(Role.ADMIN) */
+            authGuard,
+            roleGuard(Role.ADMIN),
+            await validationPipe(userSchema),
           ],
           handler: this.createUser.bind(this),
         },
         // user login
         {
           path: '/login',
+          // use middlewares
+          middlewares: [await validationPipe(userLoginSchema)],
           handler: this.login.bind(this),
         },
         // user logout
