@@ -1,7 +1,7 @@
 {
-  "name": "express-ts-boilerplate",
+  "name": "cisum-api",
   "version": "1.0.0",
-  "description": "Express + TypeScript Boilerplate",
+  "description": "Small on-line music player developed in NodeJS (ExpressJS) and MongoDB (Mongoose), using Typescript as super set",
   "main": "src/main.ts",
   "scripts": {
     "start": "cross-env NODE_ENV=production node ./build/main.js",
