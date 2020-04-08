@@ -67,11 +67,11 @@ jspm_packages/
 .yarn-integrity
 
 # dotenv environment variables file
-.env.development
+# .env.development
 .env.production
 
 # rsa keys
-src/assets/rsa-keys
+# src/assets/rsa-keys
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
