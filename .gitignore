@@ -67,8 +67,8 @@ jspm_packages/
 .yarn-integrity
 
 # dotenv environment variables file
-# .env.development
-.env.production
+.env.development
+# .env.production
 
 # rsa keys
 # src/assets/rsa-keys
