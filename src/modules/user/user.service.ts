@@ -37,7 +37,6 @@ export class UserService extends Service {
   /** get all users */
   public async getAll(): Promise<ServiceResponse<UserDocument[]>> {
     const users = await UserModel.find();
-    console.log({ users });
     return this.response(HttpStatus.OK, users);
   }
 
