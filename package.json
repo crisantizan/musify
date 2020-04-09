@@ -51,6 +51,7 @@
     "@hapi/joi": "^17.1.1",
     "@types/express": "^4.17.3",
     "bcryptjs": "^2.4.3",
+    "cloudinary": "^1.21.0",
     "cors": "^2.8.5",
     "cron": "^1.8.2",
     "cross-env": "^7.0.2",

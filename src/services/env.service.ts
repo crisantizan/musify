@@ -12,6 +12,9 @@ interface EnvConfig {
   REDIS_PORT: number;
   REDIS_HOST: string;
   REDIS_PASS: string;
+  CLOUD_NAME: string;
+  CLOUD_API_KEY: number;
+  CLOUD_API_SECRET: string;
 }
 
 /** get environment variables */
@@ -52,6 +55,9 @@ export class EnvService {
       REDIS_HOST: process.env.REDIS_HOST!,
       REDIS_PORT: (process.env.REDIS_PORT as unknown) as number,
       REDIS_PASS: process.env.REDIS_PASS!,
+      CLOUD_NAME: process.env.CLOUD_NAME!,
+      CLOUD_API_KEY: (process.env.CLOUD_API_KEY as unknown) as number,
+      CLOUD_API_SECRET: process.env.CLOUD_API_SECRET!,
     };
   }
 
@@ -68,6 +74,9 @@ export class EnvService {
       REDIS_PORT: Joi.number()
         .default(6379)
         .required(),
+      CLOUD_NAME: Joi.string().required(),
+      CLOUD_API_KEY: Joi.number().required(),
+      CLOUD_API_SECRET: Joi.string().required(),
     });
 
     const { error, value } = schema.validate(envConfig);
@@ -110,6 +119,15 @@ export class EnvService {
       host: this.envConfig.REDIS_HOST,
       port: this.envConfig.REDIS_PORT,
       password: this.envConfig.REDIS_PASS,
+    };
+  }
+
+  /** cloudinary config */
+  get cloudinaryConfig() {
+    return {
+      api_name: this.envConfig.CLOUD_NAME,
+      api_key: this.envConfig.CLOUD_API_KEY,
+      api_secret: this.envConfig.CLOUD_API_SECRET,
     };
   }
 }
