@@ -10,7 +10,9 @@ import { RedisService } from '@/services/redis.service';
 import { Role } from '@/common/enums';
 import { removeAsset, getAssetPath } from '@/helpers/multer.helper';
 import { getMongooseSession } from '@/db/session';
-import { isEquals, mergeObject } from '@/helpers/service.helper';
+import { isEquals, mergeObject, objectIsEmpty } from '@/helpers/service.helper';
+import { cloudService } from '@/services/cloudinary.service';
+import { CloudFolder } from '@/helpers/cloudinary.helper';
 
 export class UserService extends Service {
   constructor(
@@ -76,7 +78,7 @@ export class UserService extends Service {
     }
 
     // set image property as null
-    const model = new UserModel({ ...data, image: null });
+    const model = new UserModel({ ...data, image: { id: null, path: null } });
     const user = await model.save();
 
     return this.response(HttpStatus.CREATED, user);
@@ -152,12 +154,25 @@ export class UserService extends Service {
         );
       }
 
-      let oldImage = user.image;
+      let oldImageId = !objectIsEmpty(user.image!) ? user.image!.id : null;
 
       // add new image
       if (!!file) {
+        const result = await cloudService.uploader.upload(file.path, {
+          folder: CloudFolder.USERS,
+        });
+
         // assign new image
-        data.image = file.filename;
+        data.image = {
+          id: result.public_id,
+          // send croped image
+          path: cloudService.url(result.public_id, {
+            height: 150,
+            width: 150,
+            crop: 'fill',
+            secure: true,
+          }),
+        };
       }
 
       // update
@@ -165,10 +180,11 @@ export class UserService extends Service {
       await session.commitTransaction();
 
       // delete old image of disk if other has been established
-      if (!!oldImage && !!file) {
-        const path = getAssetPath('IMAGES_USERS');
-        await removeAsset(path, oldImage);
+      if (!!oldImageId && !!file) {
+        await cloudService.uploader.destroy(oldImageId);
       }
+
+      !!file && removeAsset(file.path);
 
       return this.response(HttpStatus.OK, mergeObject(data, user));
     } catch (error) {

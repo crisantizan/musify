@@ -7,13 +7,13 @@ import { FolderAssetType } from '@/typings/asset.typing';
 import { serviceResponse } from './service.helper';
 import { generateToken } from './shared.helper';
 
-export function imageMulterStorage(userImage = false) {
-  const destination = getAssetPath(!userImage ? 'TEMP_IMAGES' : 'IMAGES_USERS');
+export function imageMulterStorage() {
+  const destination = getAssetPath('TEMP_IMAGES');
 
   return multer.diskStorage({
     destination,
     filename: (req, file, cb) => {
-      const token = generateToken(10, true);
+      const token = generateToken(10);
       const extension = extname(file.originalname);
 
       cb(null, `${token}${extension}`);

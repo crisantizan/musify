@@ -62,3 +62,10 @@ export interface PaginationSongOptions extends Object, PaginationOptions {
 }
 
 export type MulterFile = Express.Multer.File;
+
+export interface Asset {
+  /** public_id */
+  id: string;
+  /** asset full path */
+  path: string;
+}

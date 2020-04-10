@@ -4,13 +4,17 @@ import { UserService } from './user.service';
 import { UserLogin, UserCreate } from './user.type';
 import { Controller } from '../controller';
 import { authGuard } from '@/common/http/guards/auth.guard';
-import { uploadUserImageMiddleware } from '@/common/http/middlewares/upload-images.middleware';
+import {
+  uploadUserImageMiddleware,
+  uploadTempImageMiddleware,
+} from '@/common/http/middlewares/upload-images.middleware';
 import { validationPipe } from '@/common/http/pipes';
 import { userUpdateSchema } from '@/common/joi-schemas/user-update.schema';
 import { getAssetPath } from '@/helpers/multer.helper';
 import { HttpStatus, Role } from '@/common/enums';
 import { userLoginSchema, userSchema } from '@/common/joi-schemas';
 import { roleGuard } from '@/common/http/guards/role.guard';
+import { cloudService } from '@/services/cloudinary.service';
 
 export class UserController extends Controller implements IController {
   public route: string = '/users';
@@ -56,11 +60,7 @@ export class UserController extends Controller implements IController {
         // create user
         {
           path: '/',
-          middlewares: [
-            authGuard,
-            roleGuard(Role.ADMIN),
-            await validationPipe(userSchema),
-          ],
+          middlewares: [authGuard, await validationPipe(userSchema)],
           handler: this.createUser.bind(this),
         },
         // user login
@@ -82,6 +82,12 @@ export class UserController extends Controller implements IController {
           middlewares: [authGuard, uploadUserImageMiddleware],
           handler: this.uploadAvatar.bind(this),
         },
+        // upload in cloudinary
+        {
+          path: '/cloudinary',
+          middlewares: [uploadTempImageMiddleware],
+          handler: this.cloudinary.bind(this),
+        },
       ],
       put: [
         // update user data
@@ -96,6 +102,67 @@ export class UserController extends Controller implements IController {
         },
       ],
     };
+  }
+
+  private async cloudinary(req: Request, res: Response) {
+    try {
+      // const result = await cloudService.uploader.upload(req.file.path, {
+      //   folder: 'cisum-test/images',
+      // });
+      // const result = await cloudService.api.delete_all_resources({
+      //   prefix: 'edit_solid',
+      // });
+      // const result = await cloudService.api.delete_resources_by_prefix(
+      //   'artists/metallica',
+      // );
+      // const result = await cloudService.uploader.rename(
+      //   'cisum/artists/metallica/album1',
+      //   'cisum/artists/trivium/album1',
+      // );
+      const result = cloudService.url('cisum/users/dqwbyvipn8pwmixvzvhz', {
+        height: 150,
+        width: 150,
+        crop: 'fill',
+      });
+      // const result = cloudService.image(
+      //   'https://res.cloudinary.com/crisantizan/image/upload/v1586484858/cisum/users/dqwbyvipn8pwmixvzvhz.png',
+      //   {
+      //     height: 150,
+      //     width: 150,
+      //     crop: 'thumb',
+      //   },
+      // );
+      // ROOT: cisum/
+      // ARTIST: cisum/artists/artistId
+      // ALBUM: cisum/artists/artistId/albums/albumId
+      // SONG: cisum/artists/artistId/albums/albumId/songId
+      // const result = await cloudService.api.delete_resources([
+      //   'cisum-test/ncjsh23ssj28jcLkB/mobtzwcaurzuwewbhm9p',
+      //   'cisum-test/ncjsh23ssj28jcLkB/adluoaysqqsnn18uq6il',
+      // ]);
+      // await cloudService.api.create_upload_preset()
+      // const result = await (cloudService.api as any).delete_folder('cisum-test');
+      // const result = await cloudService.uploader.destroy(
+      //   'cisum-test/ncjsh23ssj28jcLkB',
+      //   { type: 'folder' }
+      // );
+      //https://827919318754376:u4mozTFyOw8VVNT8Rma_h4_v-RM@api.cloudinary.com/v1_1/crisantizan/resources/image
+      // console
+      /**
+       * https://cloudinary.com/console/api/v1/operations/delete_folder
+       * {path: "hola", delete_resources: true, resources_limit: 1000}
+       */
+      // id artist: 8njhJhnl0oNj12
+      // id album 1 jahanBhxgS5tSGhAAA8
+      // id AKJknksjAJ
+      // id album 2 akjNVjnasDHhJSJnkK
+      // id KlAm9889JjN
+      // id KSJnajHAH
+      // id artist2 lakIksj76HnshaB
+      res.json({ result });
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   /** create a new user */

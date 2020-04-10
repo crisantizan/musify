@@ -125,7 +125,7 @@ export class EnvService {
   /** cloudinary config */
   get cloudinaryConfig() {
     return {
-      api_name: this.envConfig.CLOUD_NAME,
+      cloud_name: this.envConfig.CLOUD_NAME,
       api_key: this.envConfig.CLOUD_API_KEY,
       api_secret: this.envConfig.CLOUD_API_SECRET,
     };

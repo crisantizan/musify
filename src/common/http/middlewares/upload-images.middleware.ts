@@ -4,7 +4,7 @@ import { kilobytesTobytes } from '@/helpers/shared.helper';
 
 /** upload user image through «image» field */
 export const uploadUserImageMiddleware = multerMiddleware(
-  imageMulterStorage(true),
+  imageMulterStorage(),
   {
     fileFilter: multerImageFilter,
     limits: { fileSize: kilobytesTobytes(350) },
