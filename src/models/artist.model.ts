@@ -10,7 +10,10 @@ const ArtistSchema = new Schema(
   {
     name: { type: String, required: true },
     description: { type: String, required: true },
-    coverImage: { type: String, required: false, default: null },
+    coverImage: {
+      id: { type: String, required: false, default: null },
+      path: { type: String, required: false, default: null },
+    },
   },
   { timestamps: true },
 );

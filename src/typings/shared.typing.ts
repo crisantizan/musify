@@ -65,7 +65,7 @@ export type MulterFile = Express.Multer.File;
 
 export interface Asset {
   /** public_id */
-  id: string;
+  id: string | null;
   /** asset full path */
-  path: string;
+  path: string | null;
 }

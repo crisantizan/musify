@@ -10,9 +10,11 @@ import {
   transformPath,
 } from '@/helpers/multer.helper';
 import { getMongooseSession } from '@/db/session';
-import { isEquals, mergeObject } from '@/helpers/service.helper';
+import { isEquals, mergeObject, objectIsEmpty } from '@/helpers/service.helper';
 import { PaginationArtistOptions } from '@/typings/shared.typing';
 import { move } from 'fs-extra';
+import { cloudService } from '@/services/cloudinary.service';
+import { CloudHelper } from '@/helpers/cloudinary.helper';
 
 export class ArtistService extends Service {
   constructor() {
@@ -54,14 +56,28 @@ export class ArtistService extends Service {
     const artistId = new mongo.ObjectId().toHexString();
 
     if (!!file) {
-      // path to save in database
-      const pathToDB = join(artistId, file.filename);
-      // final path
-      const fullPath = getAssetPath('ARTISTS', pathToDB);
-      // move from temp files to final folder
-      await move(file.path, fullPath);
+      const result = await cloudService.uploader.upload(file.path, {
+        folder: CloudHelper.genArtistsFolder(artistId),
+      });
 
-      data.coverImage = transformPath(pathToDB, 'encode');
+      data.coverImage = {
+        id: result.public_id,
+        // send croped image
+        path: cloudService.url(result.public_id, {
+          height: 350,
+          width: 250,
+          crop: 'fill',
+          secure: true,
+        }),
+      };
+
+      // remove local image
+      await removeAsset(file.path);
+    } else {
+      data.coverImage = {
+        id: null,
+        path: null,
+      };
     }
 
     const artist = new ArtistModel({ _id: artistId, ...data });
@@ -96,31 +112,36 @@ export class ArtistService extends Service {
       );
     }
 
-    const oldImage = !!artist.coverImage
-      ? transformPath(artist.coverImage!, 'decode')
-      : '';
+    const oldImageId = !objectIsEmpty(artist.coverImage!)
+      ? artist.coverImage!.id
+      : null;
 
     // add new image
     if (!!file) {
-      // path to save in database
-      const pathToDB = join(artistId, file.filename);
-      // final path
-      const fullPath = getAssetPath('ARTISTS', pathToDB);
-      // move from temp files to final folder
-      await move(file.path, fullPath);
+      const result = await cloudService.uploader.upload(file.path, {
+        folder: CloudHelper.genArtistsFolder(artistId),
+      });
 
-      // assign new image
-      data.coverImage = transformPath(pathToDB, 'encode');
+      data.coverImage = {
+        id: result.public_id,
+        // send croped image
+        path: cloudService.url(result.public_id, {
+          height: 350,
+          width: 250,
+          crop: 'fill',
+          secure: true,
+        }),
+      };
+
+      // remove local image
+      await removeAsset(file.path);
     }
 
     // update
     await artist.updateOne(data);
 
-    // delete old image of disk if other has been established
-    if (!!oldImage && !!file) {
-      const path = getAssetPath('ARTISTS');
-      await removeAsset(path, oldImage);
-    }
+    // delete old image if other has been established
+    !!oldImageId && (await cloudService.uploader.destroy(oldImageId));
 
     return this.response(HttpStatus.OK, mergeObject(data, artist));
   }

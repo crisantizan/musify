@@ -76,12 +76,6 @@ export class UserController extends Controller implements IController {
           middlewares: [authGuard],
           handler: this.logout.bind(this),
         },
-        // upload user image
-        {
-          path: '/upload-avatar',
-          middlewares: [authGuard, uploadUserImageMiddleware],
-          handler: this.uploadAvatar.bind(this),
-        },
         // upload in cloudinary
         {
           path: '/cloudinary',
@@ -218,12 +212,6 @@ export class UserController extends Controller implements IController {
     } catch (error) {
       this.handleError(error, res);
     }
-  }
-
-  /** [POST] upload user avatar */
-  private async uploadAvatar(req: Request, res: Response) {
-    // console.log({ file: req.file, userId: req.params });
-    res.json('works!');
   }
 
   /** [POST] user login */

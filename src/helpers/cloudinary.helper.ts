@@ -17,8 +17,11 @@ export function genCloudUsersPath(publicId: string) {
   return join(CloudFolder.USERS, publicId);
 }
 
-export function genCloudArtistsPath(artistId: string) {
-
+export class CloudHelper {
+  /** generate artist folder direction */
+  public static genArtistsFolder(artistId: string) {
+    return join(CloudFolder.ARTISTS, artistId);
+  }
 }
 
 type CloudFolderBase = 'users' | 'artists';
