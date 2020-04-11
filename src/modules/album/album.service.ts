@@ -183,8 +183,12 @@ export class AlbumService extends Service {
       throw this.response(HttpStatus.NOT_FOUND, "album doesn't exists");
     }
 
-    const path = genAlbumUploadPath(String(album.artist), albumId);
-    await removeAsset(getAssetPath('ARTISTS', path));
+    const folder = CloudHelper.genAlbumFolder(String(album.artist), albumId);
+
+    // remove all files of this album
+    await cloudService.api.delete_resources_by_prefix(folder);
+    // remove empty folder
+    await (cloudService.api as any).delete_folder(folder);
 
     return this.response(HttpStatus.OK, 'album removed successfully!');
   }
