@@ -11,7 +11,10 @@ const AlbumSchema = new Schema(
     title: { type: String, required: true },
     description: { type: String, required: true },
     year: { type: Number, required: true },
-    coverImage: { type: String, required: false, default: null },
+    coverImage: {
+      id: { type: String, required: false, default: null },
+      path: { type: String, required: false, default: null },
+    },
     artist: { type: Schema.Types.ObjectId, ref: 'Artist', required: true },
   },
   { timestamps: true },

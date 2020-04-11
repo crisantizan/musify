@@ -1,4 +1,4 @@
-import { TimestampsFields } from '@/typings/shared.typing';
+import { TimestampsFields, Asset } from '@/typings/shared.typing';
 import { ArtistDocument, SongDocument } from '@/models';
 
 /** necesary data to create a one album */
@@ -6,7 +6,7 @@ export interface AlbumCreate {
   title: string;
   description: string;
   year: number;
-  coverImage: string | null;
+  coverImage: Asset | null;
   artist: ArtistDocument | string;
 }
 

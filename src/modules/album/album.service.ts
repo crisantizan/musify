@@ -17,6 +17,8 @@ import {
   removeUndefinedProps,
 } from '@/helpers/service.helper';
 import { move } from 'fs-extra';
+import { cloudService } from '@/services/cloudinary.service';
+import { CloudHelper } from '@/helpers/cloudinary.helper';
 
 export class AlbumService extends Service {
   constructor() {
@@ -82,19 +84,28 @@ export class AlbumService extends Service {
     const albumId = new mongo.ObjectId().toHexString();
 
     if (!!file) {
-      // path to save in database
-      const pathToBD = genAlbumUploadPath(
-        data.artist as string,
-        albumId,
-        file.filename,
-      );
-      // final path
-      const fullPath = getAssetPath('ARTISTS', pathToBD);
+      const result = await cloudService.uploader.upload(file.path, {
+        folder: CloudHelper.genAlbumFolder(<string>data.artist, albumId),
+      });
 
-      // move from temp files to final folder
-      await move(file.path, fullPath);
+      data.coverImage = {
+        id: result.public_id,
+        // send croped image
+        path: cloudService.url(result.public_id, {
+          height: 350,
+          width: 250,
+          crop: 'fill',
+          secure: true,
+        }),
+      };
 
-      data.coverImage = transformPath(pathToBD, 'encode');
+      // remove local image
+      await removeAsset(file.path);
+    } else {
+      data.coverImage = {
+        id: null,
+        path: null,
+      };
     }
 
     const album = new AlbumModel({ _id: albumId, ...data });
@@ -131,34 +142,35 @@ export class AlbumService extends Service {
       );
     }
 
-    const oldImage = !!album.coverImage
-      ? transformPath(album.coverImage!, 'decode')
-      : '';
+    const oldImageId = !objectIsEmpty(album.coverImage!)
+      ? album.coverImage!.id
+      : null;
 
     // add new image
     if (!!file) {
-      // path to save in database
-      const pathToBD = genAlbumUploadPath(
-        String(album.artist),
-        String(album._id),
-        file.filename,
-      );
-      // final path
-      const fullPath = getAssetPath('ARTISTS', pathToBD);
-      // move from temp files to final folder
-      await move(file.path, fullPath);
+      const result = await cloudService.uploader.upload(file.path, {
+        folder: CloudHelper.genAlbumFolder(String(album.artist), albumId),
+      });
 
-      // assign new image
-      data.coverImage = transformPath(pathToBD, 'encode');
+      data.coverImage = {
+        id: result.public_id,
+        // send croped image
+        path: cloudService.url(result.public_id, {
+          height: 350,
+          width: 250,
+          crop: 'fill',
+          secure: true,
+        }),
+      };
+
+      // remove local image
+      await removeAsset(file.path);
     }
 
     await album.updateOne(data);
 
-    // delete old image of disk if other has been established
-    if (!!oldImage && !!file) {
-      const path = getAssetPath('ARTISTS');
-      await removeAsset(path, oldImage);
-    }
+    // delete old image if other has been established
+    !!oldImageId && (await cloudService.uploader.destroy(oldImageId));
 
     return this.response(HttpStatus.OK, mergeObject(data, album));
   }

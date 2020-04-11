@@ -153,6 +153,7 @@ export class AlbumController extends Controller implements IController {
       const result = await this.albumService.update(albumId, body, file);
       return this.sendResponse(result, res);
     } catch (error) {
+      console.log(error);
       if (!!req.file && !!error.name && error.name !== 'REMOVE_ASSET') {
         // remove image upladed
         await removeAsset(req.file.path);
