@@ -15,7 +15,7 @@ export interface SongUpdate {
   name?: string;
   duration?: string;
   file?: string | Asset;
-  album?: string;
+  // album?: string;
   // only augmentation in code
   coverImage?: Asset;
 }

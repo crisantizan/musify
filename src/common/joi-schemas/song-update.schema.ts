@@ -8,6 +8,5 @@ export const songUpdateSchema = joi.object<SongCreate>({
     .string()
     .optional()
     .pattern(/^[0-9]+:[0-59]+/),
-    file: joi.string().optional(),
-  album: joi.string().optional(),
+  file: joi.string().optional(),
 });
