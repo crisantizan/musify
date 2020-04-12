@@ -14,7 +14,7 @@ export interface SongCreate {
 export interface SongUpdate {
   name?: string;
   duration?: string;
-  file?: string;
+  file?: string | Asset;
   album?: string;
   // only augmentation in code
   coverImage?: Asset;

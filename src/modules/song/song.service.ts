@@ -17,7 +17,6 @@ import {
   isEquals,
   mergeObject,
   objectIsEmpty,
-  assetFileName,
   removeUndefinedProps,
 } from '@/helpers/service.helper';
 import { cloudService } from '@/services/cloudinary.service';
@@ -77,7 +76,7 @@ export class SongService extends Service {
   }
 
   /** update an song */
-  public async update(
+  public async update1(
     songId: string,
     data: SongUpdate,
     imageFile?: MulterFile,
@@ -127,7 +126,10 @@ export class SongService extends Service {
     let soundDestination = '';
     // if an audio file has been sent
     if (!!newSoundFileName) {
-      const pathTempAudio = getAssetPath('TEMP_SONGS', newSoundFileName);
+      const pathTempAudio = getAssetPath(
+        'TEMP_SONGS',
+        <string>newSoundFileName,
+      );
 
       // verify audio file
       if (!(await pathExists(pathTempAudio))) {
@@ -141,7 +143,7 @@ export class SongService extends Service {
 
       soundDestination = getAssetPath(
         'ARTISTS',
-        transformPath(/* song.file */'', 'decode'),
+        transformPath(/* song.file */ '', 'decode'),
       );
 
       // data.file = song.file;
@@ -222,36 +224,36 @@ export class SongService extends Service {
 
     try {
       // change song of album directory
-      !!newSongFolder &&
-        (await move(
-          getAssetPath('ARTISTS', currentSongFolder),
-          getAssetPath('ARTISTS', newSongFolder),
-        ));
+      // !!newSongFolder &&
+      //   (await move(
+      //     getAssetPath('ARTISTS', currentSongFolder),
+      //     getAssetPath('ARTISTS', newSongFolder),
+      //   ));
 
       // new image has been sent
-      if (!!imageFile) {
-        // song already had a image
-        !!imageDestination
-          ? // replace old image with the new
-            await move(imageFile.path, imageDestination, { overwrite: true })
-          : // move new image to song folder
-            await move(
-              imageFile.path,
-              getAssetPath(
-                'ARTISTS',
-                newSongFolder || currentSongFolder,
-                imageFile.filename,
-              ),
-            );
-      }
+      // if (!!imageFile) {
+      //   // song already had a image
+      //   !!imageDestination
+      //     ? // replace old image with the new
+      //       await move(imageFile.path, imageDestination, { overwrite: true })
+      //     : // move new image to song folder
+      //       await move(
+      //         imageFile.path,
+      //         getAssetPath(
+      //           'ARTISTS',
+      //           newSongFolder || currentSongFolder,
+      //           imageFile.filename,
+      //         ),
+      //       );
+      // }
 
       // new audio has been sent
-      !!soundDestination &&
-        (await move(
-          getAssetPath('TEMP_SONGS', newSoundFileName!),
-          soundDestination,
-          { overwrite: true },
-        ));
+      // !!soundDestination &&
+      //   (await move(
+      //     getAssetPath('TEMP_SONGS', newSoundFileName!),
+      //     soundDestination,
+      //     { overwrite: true },
+      //   ));
 
       await song.updateOne(data);
 
@@ -260,6 +262,118 @@ export class SongService extends Service {
       console.log(error);
       !!imageFile && (await removeAsset(imageFile.path));
 
+      throw error;
+    }
+  }
+
+  /** update a song */
+  public async update(
+    songId: string,
+    data: SongUpdate,
+    imageFile?: MulterFile,
+  ) {
+    try {
+      const song = await SongModel.findById(songId).populate({
+        path: 'album',
+        select: '_id title artist',
+        lean: true,
+        populate: {
+          path: 'artist',
+          select: '_id name',
+          lean: true,
+        },
+      });
+
+      // verify if song exists
+      if (!song) {
+        throw this.response(HttpStatus.NOT_FOUND, "song doesn't exists");
+      }
+
+      if (!imageFile && !data.file && objectIsEmpty(data)) {
+        throw this.response(
+          HttpStatus.BAD_REQUEST,
+          'at least one field must be sent',
+        );
+      }
+
+      // if the same data has been sent
+      if (!imageFile && !data.file && isEquals(data, song, 'file', 'album')) {
+        throw this.response(
+          HttpStatus.BAD_REQUEST,
+          'the same data has been sent',
+        );
+      }
+
+      // song folder in cloudinary
+      const folder = CloudHelper.genSongFolder(
+        String(((song.album as AlbumDocument).artist as ArtistDocument)._id),
+        String((song.album as AlbumDocument)._id),
+        songId,
+      );
+
+      // if the new song has been sent
+      if (!!data.file) {
+        const audioPath: string = getAssetPath('TEMP_SONGS', <string>data.file);
+
+        // verify audio file existence
+        if (!(await pathExists(audioPath))) {
+          console.error(new Error(`Path: ${audioPath} doesn't exists`));
+
+          throw this.response(
+            HttpStatus.INTERNAL_SERVER_ERROR,
+            'Internal server error',
+          );
+        }
+
+        // upload to cloudinary
+        const audioResult = await cloudService.uploader.upload(audioPath, {
+          folder,
+          resource_type: 'video',
+        });
+
+        data.file = {
+          id: audioResult.public_id,
+          path: audioResult.secure_url,
+        };
+
+        // remove from local
+        await removeAsset(audioPath);
+
+        // remove old audio file if it's exists
+        !!song.file.id &&
+          (await cloudService.uploader.destroy(song.file.id, {
+            resource_type: 'video',
+          } as any));
+      }
+
+      // if a new image has been sent
+      if (!!imageFile) {
+        const imageResult = await cloudService.uploader.upload(imageFile.path, {
+          folder,
+        });
+
+        data.coverImage = {
+          id: imageResult.public_id,
+          path: cloudService.url(imageResult.public_id, {
+            height: 250,
+            width: 250,
+            crop: 'fill',
+            secure: true,
+          }),
+        };
+
+        // remove from local
+        await removeAsset(imageFile.path);
+
+        // remove old image file
+        !!song.coverImage.id &&
+          (await cloudService.uploader.destroy(song.coverImage.id));
+      }
+
+      await song.updateOne(data);
+
+      return this.response(HttpStatus.OK, mergeObject(data, song));
+    } catch (error) {
       throw error;
     }
   }
@@ -311,7 +425,6 @@ export class SongService extends Service {
 
       // remove local image
       await removeAsset(imageFile.path);
-
     } else {
       data.coverImage = {
         id: null,
@@ -322,7 +435,7 @@ export class SongService extends Service {
     // uplad to cloudinary
     const audioResult = await cloudService.uploader.upload(audioPath, {
       folder,
-      resource_type: 'video'
+      resource_type: 'video',
     });
 
     // asign data of cloudinary

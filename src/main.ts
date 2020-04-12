@@ -23,7 +23,7 @@ async function bootstrap() {
   ];
 
   try {
-    const x = await mongoConnect(mongoUri);
+    await mongoConnect(mongoUri);
 
     const server = app.listen(port, () => {
       console.info(`[${env}] server running on port: ${port}`);

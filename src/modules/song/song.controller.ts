@@ -141,11 +141,6 @@ export class SongController extends Controller implements IController {
       const result = await this.songService.create(req.body, req.file);
       this.sendResponse(result, res);
     } catch (error) {
-      if (!!req.file) {
-        const path = getAssetPath('TEMP_IMAGES', req.file.filename);
-        // remove image recent uploaded
-        await removeAsset(path);
-      }
       this.handleError(error, res);
     }
   }
