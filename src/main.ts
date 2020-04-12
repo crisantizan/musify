@@ -25,12 +25,15 @@ async function bootstrap() {
   try {
     const x = await mongoConnect(mongoUri);
 
-    app.listen(port, () => {
+    const server = app.listen(port, () => {
       console.info(`[${env}] server running on port: ${port}`);
 
       // start running cron job
-      env === 'production' && jobService.start();
+      // env === 'production' && jobService.start();
     });
+
+    // 4 minutes
+    server.timeout = 4 * 60000;
   } catch (error) {
     console.error(error);
   }

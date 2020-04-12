@@ -20,6 +20,8 @@ import {
   assetFileName,
   removeUndefinedProps,
 } from '@/helpers/service.helper';
+import { cloudService } from '@/services/cloudinary.service';
+import { CloudHelper } from '@/helpers/cloudinary.helper';
 
 export class SongService extends Service {
   constructor() {
@@ -139,10 +141,10 @@ export class SongService extends Service {
 
       soundDestination = getAssetPath(
         'ARTISTS',
-        transformPath(song.file, 'decode'),
+        transformPath(/* song.file */'', 'decode'),
       );
 
-      data.file = song.file;
+      // data.file = song.file;
     }
 
     let imageDestination = '';
@@ -151,7 +153,7 @@ export class SongService extends Service {
     if (!!imageFile && !!song.coverImage) {
       imageDestination = getAssetPath(
         'ARTISTS',
-        transformPath(song.coverImage, 'decode'),
+        transformPath(song.coverImage.path!, 'decode'),
       );
     }
 
@@ -177,7 +179,7 @@ export class SongService extends Service {
       // if new audio file has been sent
       if (!!newSoundFileName) {
         // rename path: only change the album folder
-        const newSoundPath = join(newSongFolder, song.file.split('$')[5]);
+        const newSoundPath = join(newSongFolder, song.file.path!.split('$')[5]);
 
         // assign the new address
         data.file = transformPath(newSoundPath, 'encode');
@@ -185,10 +187,10 @@ export class SongService extends Service {
         soundDestination = getAssetPath('ARTISTS', newSoundPath);
       } else {
         // update current audio file path
-        song.file = transformPath(
-          join(newSongFolder, song.file.split('$')[5]),
-          'encode',
-        );
+        // song.file = transformPath(
+        //   join(newSongFolder, song.file.split('$')[5]),
+        //   'encode',
+        // );
       }
 
       if (!!imageFile) {
@@ -196,12 +198,12 @@ export class SongService extends Service {
           newSongFolder,
           !!song.coverImage
             ? // if the current song already have a image
-              song.coverImage.split('$')[5]
+              song.coverImage.path!.split('$')[5]
             : // assign the new image, before don't had
               imageFile.filename,
         );
         // assign new cover image path
-        data.coverImage = transformPath(newImageFolder, 'encode');
+        // data.coverImage = transformPath(newImageFolder, 'encode');
 
         // if the current song already has an cover image
         if (!!song.coverImage) {
@@ -210,10 +212,10 @@ export class SongService extends Service {
       } else {
         // update the current image file path, if there's
         if (!!song.coverImage) {
-          song.coverImage = transformPath(
-            join(newSongFolder, song.coverImage.split('$')[5]),
-            'encode',
-          );
+          // song.coverImage = transformPath(
+          //   join(newSongFolder, song.coverImage.split('$')[5]),
+          //   'encode',
+          // );
         }
       }
     }
@@ -274,63 +276,70 @@ export class SongService extends Service {
       throw this.response(HttpStatus.NOT_FOUND, "album doesn't exists");
     }
 
-    const pathTempAudio = getAssetPath('TEMP_SONGS', data.file);
+    const audioPath = getAssetPath('TEMP_SONGS', <string>data.file);
 
     // verify audio file
-    if (!(await pathExists(pathTempAudio))) {
+    if (!(await pathExists(audioPath))) {
       throw this.response(HttpStatus.BAD_REQUEST, 'audio file is required');
     }
 
-    const songId = new mongo.ObjectId();
+    const songId = new mongo.ObjectId().toHexString();
 
-    let [pathToDB, coverImageFullPath] = ['', ''];
-
-    // asset path for this song
-    pathToDB = genSongUploadPath(
+    // the new folder for this song in cloudinary
+    const folder = CloudHelper.genSongFolder(
       String((album.artist as ArtistDocument)._id),
       String(album._id),
-      String(songId),
+      songId,
     );
 
     if (!!imageFile) {
-      const imageFileName = assetFileName('image', imageFile.filename);
-      // full path of the cover image
-      coverImageFullPath = getAssetPath(
-        'ARTISTS',
-        pathToDB,
-        imageFileName,
-        // imageFile.filename,
-      );
+      // uplad to cloudinary
+      const result = await cloudService.uploader.upload(imageFile.path, {
+        folder,
+      });
 
-      // asign cover image
-      data.coverImage = transformPath(join(pathToDB, imageFileName), 'encode');
+      data.coverImage = {
+        id: result.public_id,
+        // send croped image
+        path: cloudService.url(result.public_id, {
+          height: 250,
+          width: 250,
+          crop: 'fill',
+          secure: true,
+        }),
+      };
+
+      // remove local image
+      await removeAsset(imageFile.path);
+
+    } else {
+      data.coverImage = {
+        id: null,
+        path: null,
+      };
     }
 
-    const originalName = data.file;
-    const soundFileName = assetFileName('audio', data.file);
+    // uplad to cloudinary
+    const audioResult = await cloudService.uploader.upload(audioPath, {
+      folder,
+      resource_type: 'video'
+    });
 
-    // move audio file
-    const soundFullPath = getAssetPath('ARTISTS', pathToDB, soundFileName);
-
-    data.file = transformPath(join(pathToDB, soundFileName), 'encode');
+    // asign data of cloudinary
+    data.file = {
+      id: audioResult.public_id,
+      path: audioResult.secure_url,
+    };
 
     try {
-      if (!!coverImageFullPath) {
-        // move from temp files to final folder
-        await move(imageFile.path, coverImageFullPath);
-      }
-      await move(getAssetPath('TEMP_SONGS', originalName), soundFullPath);
-
       const song = await new SongModel({ _id: songId, ...data }).save();
 
       return this.response(HttpStatus.CREATED, song);
     } catch (error) {
       // error saving new song in mongo
-      if (error.code !== 'ENOENT' && !!coverImageFullPath) {
-        await removeAsset(coverImageFullPath);
+      if (error.code !== 'ENOENT' && !!imageFile) {
+        await removeAsset(imageFile.path);
       }
-
-      await removeAsset(soundFullPath);
 
       throw error;
     }
@@ -345,7 +354,8 @@ export class SongService extends Service {
         throw this.response(HttpStatus.NOT_FOUND, "song doesn't exists");
       }
 
-      const [artistId, , albumId] = song.file.split('$');
+      // const [artistId, , albumId] = song.file.split('$');
+      const [artistId, , albumId] = ['', '', ''];
 
       const path = getAssetPath(
         'ARTISTS',
