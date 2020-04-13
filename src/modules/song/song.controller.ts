@@ -1,5 +1,3 @@
-const ms = require('mediaserver');
-import { extname } from 'path';
 import { Controller } from '../controller';
 import { IController, ControllerRoutes } from '@/typings/controller.typing';
 import { Request, Response } from 'express';
@@ -11,11 +9,6 @@ import { HttpStatus } from '@/common/enums';
 import { validationPipe } from '@/common/http/pipes';
 import { songSchema, songUpdateSchema } from '@/common/joi-schemas';
 import { uploadTempImageMiddleware } from '@/common/http/middlewares/upload-images.middleware';
-import {
-  getAssetPath,
-  removeAsset,
-  transformPath,
-} from '@/helpers/multer.helper';
 import { songPaginationSchema } from '@/common/joi-schemas/song-pagination.schema';
 
 export class SongController extends Controller implements IController {
@@ -33,12 +26,6 @@ export class SongController extends Controller implements IController {
           path: '/',
           middlewares: [authGuard, await validationPipe(songPaginationSchema)],
           handler: this.searchAngPaginate.bind(this),
-        },
-        // get cover image and audio file
-        {
-          path: '/file/:path',
-          middlewares: [authGuard],
-          handler: this.getCoverImageAndAudio.bind(this),
         },
         // get one
         {
@@ -107,29 +94,6 @@ export class SongController extends Controller implements IController {
       const result = await this.songService.searchAndPaginate(req.query);
 
       return this.sendResponse(result, res);
-    } catch (error) {
-      this.handleError(error, res);
-    }
-  }
-
-  /** [GET] get cover image and audio file */
-  private async getCoverImageAndAudio(req: Request, res: Response) {
-    try {
-      const { path } = req.params;
-      const ext = extname(path);
-
-      const fullPath = getAssetPath(
-        'ARTISTS',
-        // decode path
-        transformPath(req.params.path, 'decode'),
-      );
-
-      if (ext === '.mp3') {
-        ms.pipe(req, res, fullPath);
-        return;
-      }
-
-      res.status(HttpStatus.OK).sendFile(fullPath);
     } catch (error) {
       this.handleError(error, res);
     }

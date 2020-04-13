@@ -1,18 +1,12 @@
 import { mongo } from 'mongoose';
-import { join } from 'path';
 import { Service } from '@/services';
 import { ArtistCreate } from './artist.type';
 import { ArtistModel, AlbumModel, SongModel } from '@/models';
 import { HttpStatus } from '@/common/enums';
-import {
-  getAssetPath,
-  removeAsset,
-  transformPath,
-} from '@/helpers/multer.helper';
+import { removeAsset } from '@/helpers/multer.helper';
 import { getMongooseSession } from '@/db/session';
 import { isEquals, mergeObject, objectIsEmpty } from '@/helpers/service.helper';
 import { PaginationArtistOptions } from '@/typings/shared.typing';
-import { move } from 'fs-extra';
 import { cloudService } from '@/services/cloudinary.service';
 import { CloudHelper } from '@/helpers/cloudinary.helper';
 

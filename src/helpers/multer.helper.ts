@@ -1,10 +1,9 @@
 import multer from 'multer';
-import { remove, mkdirp, pathExists } from 'fs-extra';
+import { remove, pathExists } from 'fs-extra';
 import { join, extname } from 'path';
 import { HttpException } from '@/common/http/exceptions/http.exception';
-import { HttpStatus, ArtistFolder } from '@/common/enums';
+import { HttpStatus } from '@/common/enums';
 import { FolderAssetType } from '@/typings/asset.typing';
-import { serviceResponse } from './service.helper';
 import { generateToken } from './shared.helper';
 
 export function imageMulterStorage() {
@@ -96,48 +95,4 @@ export function getAssetPath(asset: FolderAssetType, ...paths: string[]) {
     ...asset.split('_').map(folder => folder.toLowerCase()),
     ...paths,
   );
-}
-
-/** generate artist upload's path (from the artists folder) */
-export function genAlbumUploadPath(
-  artistId: string,
-  albumId: string,
-  ...paths: string[]
-) {
-  return join(artistId, ArtistFolder.ALBUMS, albumId, ...paths);
-}
-
-/** encode/decode an path */
-export function transformPath(value: string, mode: 'encode' | 'decode') {
-  return mode === 'encode'
-    ? // transform / to $
-      value.replace(/\//g, '$')
-    : // transform $ to /
-      value.replace(/\$/g, '/');
-}
-
-/** generate song upload's path (from the artists folder) */
-export function genSongUploadPath(
-  artistId: string,
-  albumId: string,
-  songId: string,
-  ...paths: string[]
-) {
-  return genAlbumUploadPath(
-    artistId,
-    albumId,
-    ArtistFolder.SONGS,
-    songId,
-    ...paths,
-  );
-}
-
-export async function createAssetFolder(path: string, folderName: string) {
-  try {
-    const fullPath = join(path, folderName);
-    await mkdirp(fullPath);
-    return fullPath;
-  } catch (error) {
-    throw serviceResponse(HttpStatus.INTERNAL_SERVER_ERROR, error);
-  }
 }

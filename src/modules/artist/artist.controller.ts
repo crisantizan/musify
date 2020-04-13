@@ -4,14 +4,13 @@ import { Request, Response } from 'express';
 import { ArtistService } from './artist.service';
 import { authGuard } from '@/common/http/guards/auth.guard';
 import { roleGuard } from '@/common/http/guards/role.guard';
-import { Role, HttpStatus } from '@/common/enums';
+import { Role } from '@/common/enums';
 import { validationPipe } from '@/common/http/pipes';
 import { artistSchema } from '@/common/joi-schemas';
-import { uploadArtistImageMiddleware } from '@/common/http/middlewares/upload-images.middleware';
 import { artistUpdateSchema } from '@/common/joi-schemas/artist-update.squema';
 import { PaginationOptions } from '@/typings/shared.typing';
 import { artistPaginationSchema } from '@/common/joi-schemas/artist-paginate.schema';
-import { getAssetPath, transformPath } from '@/helpers/multer.helper';
+import { uploadTempImageMiddleware } from '@/common/http/middlewares/upload-images.middleware';
 
 export class ArtistController extends Controller implements IController {
   public readonly route: string = '/artists';
@@ -33,12 +32,6 @@ export class ArtistController extends Controller implements IController {
           ],
           handler: this.getAll.bind(this),
         },
-        // get artist cover image
-        {
-          path: '/cover/:imagePath',
-          middlewares: [authGuard],
-          handler: this.getCoverImage.bind(this),
-        },
         // get one artist with his albums
         {
           path: '/:artistId',
@@ -53,7 +46,7 @@ export class ArtistController extends Controller implements IController {
           middlewares: [
             authGuard,
             roleGuard(Role.ADMIN),
-            uploadArtistImageMiddleware,
+            uploadTempImageMiddleware,
             await validationPipe(artistSchema),
           ],
           handler: this.create.bind(this),
@@ -66,7 +59,7 @@ export class ArtistController extends Controller implements IController {
           middlewares: [
             authGuard,
             roleGuard(Role.ADMIN),
-            uploadArtistImageMiddleware,
+            uploadTempImageMiddleware,
             await validationPipe(artistUpdateSchema),
           ],
           handler: this.update.bind(this),
@@ -101,20 +94,6 @@ export class ArtistController extends Controller implements IController {
       const result = await this.artistService.getOne(req.params.artistId);
 
       return this.sendResponse(result, res);
-    } catch (error) {
-      this.handleError(error, res);
-    }
-  }
-
-  /** [GET] get artist cover image */
-  private async getCoverImage(req: Request, res: Response) {
-    try {
-      const path = getAssetPath(
-        'ARTISTS',
-        transformPath(req.params.imagePath, 'decode'),
-      );
-
-      res.status(HttpStatus.OK).sendFile(path);
     } catch (error) {
       this.handleError(error, res);
     }

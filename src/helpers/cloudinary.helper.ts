@@ -1,13 +1,19 @@
 import { join } from 'path';
 import { ArtistFolder } from '@/common/enums';
+import { EnvService } from '@/services/env.service';
 
-export enum CloudFolder {
-  BASE = 'cisum',
-  /** upload users images */
-  USERS = 'cisum/users',
-  /** artists folder */
-  ARTISTS = 'cisum/artists',
-}
+const { inDevelopment } = new EnvService();
+
+const CLOUD_HOME_FOLDER = inDevelopment ? 'cisum-test' : 'cisum';
+const CLOUD_USERS_FOLDER = 'users';
+const CLOUD_ARTISTS_FOLDER = 'artists';
+
+/** main folders in cloudinary */
+export const CloudFolder = {
+  HOME: CLOUD_HOME_FOLDER,
+  USERS: join(CLOUD_HOME_FOLDER, CLOUD_USERS_FOLDER),
+  ARTISTS: join(CLOUD_HOME_FOLDER, CLOUD_ARTISTS_FOLDER),
+};
 
 export class CloudHelper {
   /** generate artist folder direction */

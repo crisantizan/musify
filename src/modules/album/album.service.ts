@@ -3,12 +3,7 @@ import { mongo } from 'mongoose';
 import { AlbumCreate } from './album.type';
 import { AlbumModel, ArtistModel, SongModel } from '@/models';
 import { MulterFile, PaginationAlbumOptions } from '@/typings/shared.typing';
-import {
-  getAssetPath,
-  removeAsset,
-  genAlbumUploadPath,
-  transformPath,
-} from '@/helpers/multer.helper';
+import { removeAsset } from '@/helpers/multer.helper';
 import { HttpStatus } from '@/common/enums';
 import {
   objectIsEmpty,

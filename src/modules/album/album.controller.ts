@@ -10,13 +10,8 @@ import {
   albumUpdateSchema,
   albumPaginationSchema,
 } from '@/common/joi-schemas';
-import { uploadAlbumImageMiddleware } from '@/common/http/middlewares/upload-images.middleware';
-import {
-  removeAsset,
-  getAssetPath,
-  transformPath,
-} from '@/helpers/multer.helper';
-import { HttpStatus } from '@/common/enums';
+import { removeAsset } from '@/helpers/multer.helper';
+import { uploadTempImageMiddleware } from '@/common/http/middlewares/upload-images.middleware';
 
 export class AlbumController extends Controller implements IController {
   public readonly route = '/albums';
@@ -39,12 +34,6 @@ export class AlbumController extends Controller implements IController {
           ],
           handler: this.searchAndPaginate.bind(this),
         },
-        // get artist cover image
-        {
-          path: '/cover/:imagePath',
-          middlewares: [authGuard],
-          handler: this.getCoverImage.bind(this),
-        },
         // get one album and his songs
         {
           path: '/:albumId',
@@ -59,7 +48,7 @@ export class AlbumController extends Controller implements IController {
           middlewares: [
             authGuard,
             roleGuard('ADMIN'),
-            uploadAlbumImageMiddleware,
+            uploadTempImageMiddleware,
             await validationPipe(albumSchema),
           ],
           handler: this.create.bind(this),
@@ -72,7 +61,7 @@ export class AlbumController extends Controller implements IController {
           middlewares: [
             authGuard,
             roleGuard('ADMIN'),
-            uploadAlbumImageMiddleware,
+            uploadTempImageMiddleware,
             await validationPipe(albumUpdateSchema),
           ],
           handler: this.update.bind(this),
@@ -95,21 +84,6 @@ export class AlbumController extends Controller implements IController {
       const result = await this.albumService.searchAndPaginate(req.query);
 
       return this.sendResponse(result, res);
-    } catch (error) {
-      this.handleError(error, res);
-    }
-  }
-
-  /** [GET] get album cover image */
-  private async getCoverImage(req: Request, res: Response) {
-    try {
-      const path = getAssetPath(
-        'ARTISTS',
-        // decode path
-        transformPath(req.params.imagePath, 'decode'),
-      );
-
-      res.status(HttpStatus.OK).sendFile(path);
     } catch (error) {
       this.handleError(error, res);
     }
