@@ -16,9 +16,9 @@ import {
   mergeObject,
   removeUndefinedProps,
 } from '@/helpers/service.helper';
-import { move } from 'fs-extra';
 import { cloudService } from '@/services/cloudinary.service';
 import { CloudHelper } from '@/helpers/cloudinary.helper';
+import { getMongooseSession } from '@/db/session';
 
 export class AlbumService extends Service {
   constructor() {
@@ -177,19 +177,44 @@ export class AlbumService extends Service {
 
   /** remove an album */
   public async remove(albumId: string) {
-    const album = await AlbumModel.findByIdAndRemove(albumId);
+    const session = await getMongooseSession();
+    session.startTransaction();
 
-    if (!album) {
-      throw this.response(HttpStatus.NOT_FOUND, "album doesn't exists");
+    try {
+      const album = await AlbumModel.findByIdAndDelete(albumId).session(
+        session,
+      );
+
+      if (!album) {
+        throw this.response(HttpStatus.NOT_FOUND, "album doesn't exists");
+      }
+
+      // remove all songs
+      await SongModel.deleteMany({ album: album._id }).session(session);
+      // folder in cloudinary
+      const folder = CloudHelper.genAlbumFolder(String(album.artist), albumId);
+
+      // remove all files of this song
+      await Promise.all([
+        // audio
+        cloudService.api.delete_resources_by_prefix(folder, {
+          resource_type: 'video',
+        }),
+        // images
+        cloudService.api.delete_resources_by_prefix(folder),
+      ]);
+
+      // remove empty folder
+      await (cloudService.api as any).delete_folder(folder);
+
+      await session.commitTransaction();
+
+      return this.response(HttpStatus.OK, 'album removed successfully!');
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      session.endSession();
     }
-
-    const folder = CloudHelper.genAlbumFolder(String(album.artist), albumId);
-
-    // remove all files of this album
-    await cloudService.api.delete_resources_by_prefix(folder);
-    // remove empty folder
-    await (cloudService.api as any).delete_folder(folder);
-
-    return this.response(HttpStatus.OK, 'album removed successfully!');
   }
 }

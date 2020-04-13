@@ -150,6 +150,7 @@ export class ArtistService extends Service {
   public async remove(artistId: string) {
     const session = await getMongooseSession();
     session.startTransaction();
+
     try {
       const artist = await ArtistModel.findByIdAndDelete(artistId).session(
         session,
@@ -159,14 +160,29 @@ export class ArtistService extends Service {
         throw this.response(HttpStatus.NOT_FOUND, "artist doesn't exists");
       }
 
-      const albums = await AlbumModel.find({ artist: artistId });
+      const albums = await AlbumModel.find({ artist: artistId })
+        .select('_id artist')
+        .lean();
 
       albums.forEach(async album => {
         await AlbumModel.deleteMany({ _id: album._id }).session(session);
         await SongModel.deleteMany({ album: album._id }).session(session);
       });
 
-      await removeAsset(getAssetPath('ARTISTS', artistId));
+      const folder = CloudHelper.genArtistsFolder(artistId);
+
+      // remove all files of this song
+      await Promise.all([
+        // audio
+        cloudService.api.delete_resources_by_prefix(folder, {
+          resource_type: 'video',
+        }),
+        // images
+        cloudService.api.delete_resources_by_prefix(folder),
+      ]);
+
+      // remove empty folder
+      await (cloudService.api as any).delete_folder(folder);
 
       await session.commitTransaction();
 
