@@ -47,7 +47,7 @@ export class UserController extends Controller implements IController {
         // create user
         {
           path: '/',
-          middlewares: [authGuard, await validationPipe(userSchema)],
+          middlewares: [/* authGuard,  */await validationPipe(userSchema)],
           handler: this.createUser.bind(this),
         },
         // user login
