@@ -22,7 +22,11 @@ app.set('mongoUri', mongoUri);
 app
   .use(
     cors({
-      origin: ['http://localhost:4200'],
+      origin: [
+        'http://localhost:4200',
+        'https://cisum-player.herokuapp.com',
+        'http://cisum-player.herokuapp.com',
+      ],
       exposedHeaders: 'x-token',
     }),
   )
