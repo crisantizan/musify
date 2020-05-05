@@ -27,7 +27,7 @@ export class UserController extends Controller implements IController {
         // get all users
         {
           path: '/',
-          // middlewares: [authGuard],
+          middlewares: [authGuard],
           handler: this.getAll.bind(this),
         },
         // who i'm
