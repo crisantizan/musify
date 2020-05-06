@@ -175,6 +175,10 @@ export class UserService extends Service {
         };
       }
 
+      // encrypt password
+      if (!!data.password) {
+        data.password = await EncryptService.createHash(data.password);
+      }
       // update
       await user.updateOne(data).session(session);
       await session.commitTransaction();
