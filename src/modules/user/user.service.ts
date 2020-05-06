@@ -154,6 +154,18 @@ export class UserService extends Service {
         );
       }
 
+      // verify new email
+      if (
+        !!data.email &&
+        user.email !== data.email &&
+        (await this.emailExists(data.email))
+      ) {
+        throw this.response(
+          HttpStatus.BAD_REQUEST,
+          errorFieldObject('email', 'email passed already exists'),
+        );
+      }
+
       let oldImageId = !objectIsEmpty(user.image!) ? user.image!.id : null;
 
       // add new image
