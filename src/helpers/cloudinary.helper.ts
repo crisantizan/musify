@@ -4,7 +4,7 @@ import { EnvService } from '@/services/env.service';
 
 const { inDevelopment } = new EnvService();
 
-const CLOUD_HOME_FOLDER = inDevelopment ? 'cisum-test' : 'cisum';
+const CLOUD_HOME_FOLDER = inDevelopment ? 'cisum' : 'cisum';
 const CLOUD_USERS_FOLDER = 'users';
 const CLOUD_ARTISTS_FOLDER = 'artists';
 

@@ -18,7 +18,11 @@ export function isEquals(values: any, schema: any, ...skip: string[]) {
 
   return (
     !!keys.length &&
-    keys.every(key => schema[key].toLowerCase() === values[key].toLowerCase())
+    keys.every(key => {
+      return typeof schema[key] === 'number'
+        ? schema[key] === values[key]
+        : schema[key].toLowerCase() === values[key].toLowerCase();
+    })
   );
 }
 
