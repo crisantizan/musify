@@ -63,7 +63,7 @@ export class SongService extends Service {
         lean: true,
         populate: { path: 'artist', select: '_id name', lean: true },
       },
-      sort: !!name ? 'name' : 'createdAt',
+      sort: !!name ? 'name' : '-createdAt',
     });
 
     return this.response(HttpStatus.OK, songs);
