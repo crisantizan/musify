@@ -56,10 +56,10 @@ export class SongService extends Service {
       page,
       limit,
       lean: true,
-      select: '_id name album',
+      select: '_id name album coverImage',
       populate: {
         path: 'album',
-        select: 'artist',
+        select: 'artist coverImage',
         lean: true,
         populate: { path: 'artist', select: '_id name', lean: true },
       },
