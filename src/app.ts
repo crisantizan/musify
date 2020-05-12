@@ -25,7 +25,7 @@ app
       origin: [
         'http://localhost:4200',
         'https://cisum-player.herokuapp.com',
-        'http://cisum-player.herokuapp.com',
+        'https://cisum-player.netlify.app'
       ],
       exposedHeaders: 'x-token',
     }),
